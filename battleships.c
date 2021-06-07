@@ -2,33 +2,24 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct node_t{
-	struct node_t* left;
-	struct node_t* right;
-	struct node_t* up;
-	struct node_t* down;
-	
+struct node_t {
 	int valid;
-	char ship;
+	char value;
 };
 
 struct node_t* create_board(){
+	struct node_t* arr[10][10];
 	
-}
-
-void search_find(struct node_t* head, int x, int y){
-	for(int i = 1; i < x; i++){
-		head = head->right;	
+	for(int i = 0; i < 10; i++){
+		for(int j = 0; j < 0; j++){
+			struct node_t* new = malloc(sizeof(struct node_t));
+			
+			new->valid = 0;
+			new->value = '*';
+			
+			arr[i][j] = new;
+		}
 	}
 	
-	for(int i = 1; i < y; i++){
-			head = head->down;
-	}
-}
-
-int main() {
-	
-	
-	
-	return 0;
+	return arr;
 }

@@ -8,11 +8,13 @@ struct node_t {
 };
 
 void print_board(struct node_t** arr){
-	printf("	A");
+	printf("	A ");
 	
 	for(int i = 2; i < 11; i++){
-		printf("%c", 'A' + i - 1);
+		printf("%c ", 'A' + i - 1);
 	}
+	
+	printf("\n\n");
 	
 	for(int i = 1; i < 11; i++){
 		printf("%d	", i);
@@ -26,20 +28,21 @@ void print_board(struct node_t** arr){
 }
 
 struct node_t** create_board(){
-	struct node_t* arr[10][10];
+	struct node_t** arr = malloc(12*sizeof(struct node_t));
+	
+	for(int i = 0; i < 12; i++){
+		arr[i] = malloc(12*sizeof(struct node_t));
+	}
 	
 	for(int i = 0; i < 12; i++){
 		for(int j = 0; j < 12; j++){
-			struct node_t* new = malloc(sizeof(struct node_t));
+			arr[i][j].value = '*';
+			arr[i][j].valid = 0;
 			
-			new->valid = 0;
-			new->value = '*';
-			
-			arr[i][j] = new;
 		}
 	}
 	
-	return *arr;
+	return arr;
 }
 
 /*void enter_map(struct node_t* arr){

@@ -61,8 +61,8 @@ struct node_t** create_board(){
 		if (filename == NULL){
 			// TO CHOOSE WAY OF ENDING THE PROGRAM
 		}
-		for (int i = 0; i < 10; i++){
-			for (int j = 0; j < 10; j++){
+		for (int i = 1; i < 11; i++){
+			for (int j = 1; j < 11; j++){
 				arr[i][j]->value = getc (filename);
 				if (!strcmp(arr[i][j]->value, 'X')){
 					// VALIDATE SURROUNDING CELLS

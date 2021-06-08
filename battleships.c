@@ -45,7 +45,7 @@ struct node_t** create_board(){
 	return arr;
 }
 
-/*void enter_map(struct node_t* arr){
+/*void enter_map(struct node_t** arr){
 	char answer;
 	printf("Do you want to enter with a file? (Y/N): ");
 	do {
@@ -77,9 +77,17 @@ struct node_t** create_board(){
 	}
 }*/
 
+void destroy(struct node_t **arr){
+	for (int i = 0; i < 12; i++){
+		free (arr[i]);
+	}
+	free (arr);
+
+}
+
 int main(){
 	struct node_t** arr1 = create_board();
 	print_board(arr1);
-	
+	destroy (arr1);
 	return 0;
 }

@@ -82,7 +82,6 @@ void destroy(struct node_t **arr){
 		free (arr[i]);
 	}
 	free (arr);
-
 }
 
 int main(){

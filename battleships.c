@@ -48,10 +48,29 @@ struct node_t** create_board(){
 /*void enter_map(struct node_t* arr){
 	char answer;
 	printf("Do you want to enter with a file? (Y/N): ");
-	scanf("%c", &answer);
-	
+	do {
+		scanf("%c", &answer);
+	}
+	while (!strcmp(answer, 'Y') || !strcmp(answer, 'N'));
 	if(!strcmp(answer, 'Y')){
-		//TO DO FILE
+		char filename[31];
+		fgets (filename, 31, stdin);
+		filename[strlen(filename) - 1] = '\0';
+		FILE *file;
+		file = fopen (filename, "r");
+		if (filename == NULL){
+			// TO CHOOSE WAY OF ENDING THE PROGRAM
+		}
+		for (int i = 0; i < 10; i++){
+			for (int j = 0; j < 10; j++){
+				arr[i][j]->value = getc (filename);
+				if (!strcmp(arr[i][j]->value, 'X')){
+					// VALIDATE SURROUNDING CELLS
+				}
+			}
+			filename++;
+		}
+		fclose(filename);
 	}
 	else{
 		

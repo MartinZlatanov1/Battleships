@@ -1,13 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+
+bool game_over = false;
 
 struct node_t {
+	char hidden_value;
 	int valid;
 	char value;
 };
 
-void print_board(struct node_t** arr){
+void print_board(struct node_t** arr, bool hidden){
 	printf("	A ");
 	
 	for(int i = 2; i < 11; i++){
@@ -20,7 +24,12 @@ void print_board(struct node_t** arr){
 		printf("%d	", i);
 		
 		for(int j = 1; j < 11; j++){
-			printf("%c ", arr[i][j].value);
+			if (hidden){
+				printf("%c ", arr[i][j].hidden_value);
+			}
+			else{
+				printf("%c ", arr[i][j].value);
+			}
 		}
 		
 		printf("\n");
@@ -36,6 +45,7 @@ struct node_t** create_board(){
 	
 	for(int i = 0; i < 12; i++){
 		for(int j = 0; j < 12; j++){
+			arr[i][j].hidden_value = 'O';
 			arr[i][j].value = '*';
 			arr[i][j].valid = 0;
 			
@@ -45,7 +55,19 @@ struct node_t** create_board(){
 	return arr;
 }
 
-/*void enter_map(struct node_t** arr){
+/*
+void validate_surrounding_cells (struct node_t **arr, x, y){
+	arr[x - 1][y - 1].valid++;
+	arr[x - 1][y].valid++;
+	arr[x - 1][y + 1].valid++;
+	arr[x][y - 1].valid++;
+	arr[x][y + 1].valid++;
+	arr[x + 1][y - 1].valid++;
+	arr[x + 1][y].valid++;
+	arr[x + 1][y + 1].valid++;
+}
+
+void enter_map(struct node_t** arr){
 	char answer;
 	printf("Do you want to enter with a file? (Y/N): ");
 	do {
@@ -55,17 +77,24 @@ struct node_t** create_board(){
 	if(!strcmp(answer, 'Y')){
 		char filename[31];
 		fgets (filename, 31, stdin);
-		filename[strlen(filename) - 1] = '\0';
+		if (!strcmp(filename[strlen(filename) - 1], '\n')){
+			filename[strlen(filename) - 1] = '\0';
+		}
 		FILE *file;
 		file = fopen (filename, "r");
-		if (filename == NULL){
-			// TO CHOOSE WAY OF ENDING THE PROGRAM
+		if (file == NULL){
+			game_over = true;
+			return ;
 		}
 		for (int i = 1; i < 11; i++){
 			for (int j = 1; j < 11; j++){
-				arr[i][j]->value = getc (filename);
-				if (!strcmp(arr[i][j]->value, 'X')){
-					// VALIDATE SURROUNDING CELLS
+				arr[i][j]->hidden_value = getc (filename);
+				if (strcmp('O', arr[i][j].hidden_value) && strcmp('X', arr[i][j].hidden_value)){
+					game_over = true;
+					return ;
+				}
+				if (!strcmp(arr[i][j].hidden_value, 'X')){
+					validate_surrounding_cells(arr, i, j);
 				}
 			}
 			filename++;

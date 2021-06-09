@@ -67,6 +67,38 @@ void validate_surrounding_cells (struct node_t **arr, int x, int y){
 	arr[x + 1][y + 1].valid++;
 }
 
+void extract_file(struct node_t **arr){
+	char filename[31];
+	printf("Enter the name of the name of the file.\n\
+The first 10 lines should be 10 characters of O's and X's and an enter. The rest doesn't matter.\n");
+	fgets (filename, 31, stdin);
+	if (filename[strlen(filename) - 1] == '\n'){
+		filename[strlen(filename) - 1] = '\0';
+	}
+	FILE *file;
+	file = fopen (filename, "r");
+	if (file == NULL){
+		printf("File does not exist!!!\n");
+		game_over = true;
+		return ;
+	}
+	for (int i = 1; i < 11; i++){
+		for (int j = 1; j < 11; j++){
+			arr[i][j].hidden_value = getc(file);
+			if (!(arr[i][j].hidden_value == 'O' || arr[i][j].hidden_value == 'X')){
+				printf("File contains invalid characters!!! (It should only contain O's and X's)");
+				game_over = true;
+				return ;
+			}
+			if (arr[i][j].hidden_value == 'X'){
+				validate_surrounding_cells(arr, i, j);
+			}
+		}
+		getc(file);
+	}
+	fclose(file);
+}
+
 void enter_map(struct node_t** arr){
 	char answer, prevent_enter_entered;
 	do {
@@ -76,32 +108,8 @@ void enter_map(struct node_t** arr){
 	}
 	while (!(answer == 'Y' || answer == 'N'));
 	if(answer == 'Y'){
-		char filename[31];
-		fgets (filename, 31, stdin);
-		if (filename[strlen(filename) - 1] == '\n'){
-			filename[strlen(filename) - 1] = '\0';
-		}
-		FILE *file;
-		file = fopen (filename, "r");
-		if (file == NULL){
-			printf("File does not exist!!!\n");
-			game_over = true;
-			return ;
-		}
-		for (int i = 1; i < 11; i++){
-			for (int j = 1; j < 11; j++){
-				arr[i][j].hidden_value = fgetc(file);
-				if (!(arr[i][j].hidden_value == 'O' || arr[i][j].hidden_value == 'X')){
-					game_over = true;
-					return ;
-				}
-				if (arr[i][j].hidden_value == 'X'){
-					validate_surrounding_cells(arr, i, j);
-				}
-			}
-			//file++;
-		}
-		fclose(file);
+		extract_file (arr);
+		// TO DO CHECKS
 	}
 	else{
 		

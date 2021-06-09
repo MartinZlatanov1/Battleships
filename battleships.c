@@ -73,11 +73,11 @@ void enter_map(struct node_t** arr){
 	do {
 		scanf("%c", &answer);
 	}
-	while (!strcmp(answer, 'Y') || !strcmp(answer, 'N'));
-	if(!strcmp(answer, 'Y')){
+	while (!strcmp(&answer, "Y") || !strcmp(&answer, "N"));
+	if(!strcmp(&answer, "Y")){
 		char filename[31];
 		fgets (filename, 31, stdin);
-		if (!strcmp(filename[strlen(filename) - 1], '\n')){
+		if (!strcmp(&filename[strlen(filename) - 1], "\n")){
 			filename[strlen(filename) - 1] = '\0';
 		}
 		FILE *file;
@@ -88,12 +88,12 @@ void enter_map(struct node_t** arr){
 		}
 		for (int i = 1; i < 11; i++){
 			for (int j = 1; j < 11; j++){
-				arr[i][j]->hidden_value = getc (file);
-				if (strcmp('O', arr[i][j].hidden_value) && strcmp('X', arr[i][j].hidden_value)){
+				arr[i][j].hidden_value = getc (file);
+				if (strcmp("O", &arr[i][j].hidden_value) && strcmp("X", &arr[i][j].hidden_value)){
 					game_over = true;
 					return ;
 				}
-				if (!strcmp({arr[i][j].hidden_value}, "X")){
+				if (!strcmp(&arr[i][j].hidden_value, "X")){
 					validate_surrounding_cells(arr, i, j);
 				}
 			}

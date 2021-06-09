@@ -55,8 +55,8 @@ struct node_t** create_board(){
 	return arr;
 }
 
-/*
-void validate_surrounding_cells (struct node_t **arr, x, y){
+
+void validate_surrounding_cells (struct node_t **arr, int x, int y){
 	arr[x - 1][y - 1].valid++;
 	arr[x - 1][y].valid++;
 	arr[x - 1][y + 1].valid++;
@@ -88,23 +88,23 @@ void enter_map(struct node_t** arr){
 		}
 		for (int i = 1; i < 11; i++){
 			for (int j = 1; j < 11; j++){
-				arr[i][j]->hidden_value = getc (filename);
+				arr[i][j]->hidden_value = getc (file);
 				if (strcmp('O', arr[i][j].hidden_value) && strcmp('X', arr[i][j].hidden_value)){
 					game_over = true;
 					return ;
 				}
-				if (!strcmp(arr[i][j].hidden_value, 'X')){
+				if (!strcmp({arr[i][j].hidden_value}, "X")){
 					validate_surrounding_cells(arr, i, j);
 				}
 			}
-			filename++;
+			file++;
 		}
-		fclose(filename);
+		fclose(file);
 	}
 	else{
 		
 	}
-}*/
+}
 
 void destroy(struct node_t **arr){
 	for (int i = 0; i < 12; i++){
@@ -115,7 +115,7 @@ void destroy(struct node_t **arr){
 
 int main(){
 	struct node_t** arr1 = create_board();
-	print_board(arr1);
+	print_board(arr1, true);
 	destroy (arr1);
 	return 0;
 }

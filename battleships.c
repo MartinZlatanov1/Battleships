@@ -68,36 +68,38 @@ void validate_surrounding_cells (struct node_t **arr, int x, int y){
 }
 
 void enter_map(struct node_t** arr){
-	char answer;
-	printf("Do you want to enter with a file? (Y/N): ");
+	char answer, prevent_enter_entered;
 	do {
+		printf("Do you want to enter with a file? (Y/N): ");
 		scanf("%c", &answer);
+		scanf("%c", &prevent_enter_entered);
 	}
-	while (!strcmp(&answer, "Y") || !strcmp(&answer, "N"));
-	if(!strcmp(&answer, "Y")){
+	while (!(answer == 'Y' || answer == 'N'));
+	if(answer == 'Y'){
 		char filename[31];
 		fgets (filename, 31, stdin);
-		if (!strcmp(&filename[strlen(filename) - 1], "\n")){
+		if (filename[strlen(filename) - 1] == '\n'){
 			filename[strlen(filename) - 1] = '\0';
 		}
 		FILE *file;
 		file = fopen (filename, "r");
 		if (file == NULL){
+			printf("File does not exist!!!\n");
 			game_over = true;
 			return ;
 		}
 		for (int i = 1; i < 11; i++){
 			for (int j = 1; j < 11; j++){
-				arr[i][j].hidden_value = getc (file);
-				if (strcmp("O", &arr[i][j].hidden_value) && strcmp("X", &arr[i][j].hidden_value)){
+				arr[i][j].hidden_value = fgetc(file);
+				if (!(arr[i][j].hidden_value == 'O' || arr[i][j].hidden_value == 'X')){
 					game_over = true;
 					return ;
 				}
-				if (!strcmp(&arr[i][j].hidden_value, "X")){
+				if (arr[i][j].hidden_value == 'X'){
 					validate_surrounding_cells(arr, i, j);
 				}
 			}
-			file++;
+			//file++;
 		}
 		fclose(file);
 	}
@@ -115,6 +117,7 @@ void destroy(struct node_t **arr){
 
 int main(){
 	struct node_t** arr1 = create_board();
+	enter_map(arr1);
 	print_board(arr1, true);
 	destroy (arr1);
 	return 0;

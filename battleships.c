@@ -67,7 +67,7 @@ void validate_surrounding_cells (struct node_t **arr, int x, int y){
 	arr[x + 1][y + 1].valid++;
 }
 
-void extract_file(struct node_t **arr){
+bool extract_file(struct node_t **arr){
 	char filename[31];
 	printf("Enter the name of the name of the file.\n\
 The first 10 lines should be 10 characters of O's and X's and an enter. The rest doesn't matter.\n");
@@ -80,7 +80,7 @@ The first 10 lines should be 10 characters of O's and X's and an enter. The rest
 	if (file == NULL){
 		printf("File does not exist!!!\n");
 		game_over = true;
-		return ;
+		return true;
 	}
 	for (int i = 1; i < 11; i++){
 		for (int j = 1; j < 11; j++){
@@ -88,7 +88,8 @@ The first 10 lines should be 10 characters of O's and X's and an enter. The rest
 			if (!(arr[i][j].hidden_value == 'O' || arr[i][j].hidden_value == 'X')){
 				printf("File contains invalid characters!!! (It should only contain O's and X's)");
 				game_over = true;
-				return ;
+				fclose(file);
+				return true;
 			}
 			if (arr[i][j].hidden_value == 'X'){
 				validate_surrounding_cells(arr, i, j);
@@ -97,6 +98,39 @@ The first 10 lines should be 10 characters of O's and X's and an enter. The rest
 		getc(file);
 	}
 	fclose(file);
+	return false;
+}
+
+bool check_ships (struct node_t **arr){
+	int num_of_x = 0;
+	for (int i = 1; i < 11; i++){
+		for (int j = 1; j < 11; j++){
+			if (arr[i][j].hidden_value == 'X'){
+				num_of_x++;
+				if (arr[i][j].valid == 0 || arr[i][j].valid > 2){
+					printf("The map is not valid!\n");
+					game_over = true;
+					return true;
+				}
+				if (arr[i][j].valid == 2){
+					if (arr[i][j - 1].hidden_value == 'X' && arr[i][j + 1].hidden_value == 'X'){
+						continue;
+					}
+					if (arr[i - 1][j].hidden_value == 'X' && arr[i + 1][j].hidden_value == 'X'){
+						continue;
+					}
+					game_over = true;
+					return true;
+				}
+			}
+		}
+	}
+	if (num_of_x != 31){
+		printf("Not enough or too many ships!\n");
+		game_over = true;
+		return false;
+	}
+	return false;
 }
 
 void enter_map(struct node_t** arr){
@@ -108,8 +142,13 @@ void enter_map(struct node_t** arr){
 	}
 	while (!(answer == 'Y' || answer == 'N'));
 	if(answer == 'Y'){
-		extract_file (arr);
-		// TO DO CHECKS
+		if (extract_file (arr)){
+			return ;
+		}
+		if (check_ships(arr)){
+			return ;
+		}
+		
 	}
 	else{
 		

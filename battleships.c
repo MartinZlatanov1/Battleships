@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -133,6 +134,103 @@ bool check_ships (struct node_t **arr){
 	return false;
 }
 
+bool verify_data(int x, char y, char direction, int size){
+	if(x < 1 || x > 10){
+		printf("Invalid x!!! \n");
+		return true;
+	}
+	
+	if(y < 'A' || y > 'J'){
+		printf("Invalid y!!! \n");
+		return true;
+	}
+	
+	if(direction != 'U' && direction != 'D' && direction != 'L' && direction != 'R'){
+		printf("Invalid direction!!! \n");
+		return true;
+	}
+	
+	if(size < 2 || size > 6 || size == 5){
+		printf("Invalid ship size!!! \n");
+		return true;
+	}
+	
+	if(direction == 'L' && (y - 'A' + 1) < size){
+		printf("Not enought space for ship!!! \n");
+		return true;
+	}
+	
+	if(direction == 'R' && 10 - (y - 'A') < size){
+		printf("Not enought space for ship!!! \n");
+		return true;
+	}
+	
+	if(direction == 'U' && x < size){
+		printf("Not enought space for ship!!! \n");
+		return true;
+	}
+	
+	if(direction == 'D' && (10 - x + 1) < size){
+		printf("Not enought space for ship!!! \n");
+		return true;
+	}
+	
+	return false;
+}
+
+bool check_if_occupied(struct node_t** arr, int x, char y, char direction, int size){
+	y = y - 'A' + 1;
+	
+	if(direction == 'U'){
+		for(int i = 0; i < size; i++){
+			if(!arr[x - i][y].valid){
+				return true;
+			}
+		}
+	}
+	
+	if(direction == 'D'){
+		for(int i = 0; i < size; i++){
+			if(!arr[x + i][y].valid){
+				return true;
+			}
+		}
+	}
+	
+	if(direction == 'R'){
+		for(int i = 0; i < size; i++){
+			if(!arr[x][y + i].valid){
+				return true;
+			}
+		}
+	}
+	
+	if(direction == 'L'){
+		for(int i = 0; i < size; i++){
+			if(!arr[x][y - i].valid){
+				return true;
+			}
+		}
+	}
+	
+	return false;
+}
+
+void ask_for_ship(struct node_t** arr){
+	int x, size;
+	char y, direction;
+	
+	do{
+		do{
+			printf("Enter starting point(example 4A), direction(U, D, L, R), size : \n");
+			scanf("%d%c %c %d", &x, &y, &direction, &size);
+		}
+		while(verify_data(x, y, direction, size));
+	}
+	while(check_if_occupied(arr, x, y, direction, size));
+	
+}
+
 void enter_map(struct node_t** arr){
 	char answer, prevent_enter_entered;
 	do {
@@ -144,14 +242,21 @@ void enter_map(struct node_t** arr){
 	if(answer == 'Y'){
 		if (extract_file (arr)){
 			return ;
-		}
+		 }
 		if (check_ships(arr)){
 			return ;
 		}
 		
 	}
 	else{
+		printf("a. Add a ship\nb. Change position of a ship\nc. Show board\nEnter option: ");
 		
+		scanf("%c", &answer);
+		
+		switch(answer){
+		case 'a':
+			ask_for_ship(arr);
+		}
 	}
 }
 

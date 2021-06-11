@@ -233,26 +233,6 @@ bool verify_data(int x, char y, char direction, int size, int* ships_left){
 bool check_if_real(struct node_t** arr, int x, char z, char direction, int size, int* ships_left){
 	int y = z - 'A' + 1;
 	
-	if(x < 1 || x > 10){
-		printf("Invalid x!!!\n");
-		return true;
-	}
-	
-	if(y < 1 || y > 10){
-		printf("Invalid y!!!\n");
-		return true;
-	}
-	
-	if(arr[x][y].hidden_value != 'X'){
-		printf("This is not a ship!!!\n");
-		return true;
-	}
-	
-	if(arr[x][y].ship_type != size){
-		printf("Check your size again!!!\n");
-		return true;
-	}
-	
 	bool flag = true;
 	
 	for(int i = 0; i < 5; i++){
@@ -268,8 +248,28 @@ bool check_if_real(struct node_t** arr, int x, char z, char direction, int size,
 		return true;
 	}
 	
+	if(x < 1 || x > 10){
+		printf("Invalid x!!!\n");
+		return true;
+	}
+	
+	if(y < 1 || y > 10){
+		printf("Invalid y!!!\n");
+		return true;
+	}
+	
+	if(arr[x][y].hidden_value != 'X'){
+		printf("This is not a ship!!!\n");
+		return true;
+	}
+	
 	if(direction != 'U' && direction != 'D' && direction != 'L' && direction != 'R'){
 		printf("Invalid direction!!!\n");
+		return true;
+	}
+	
+	if(arr[x][y].ship_type != size){
+		printf("Check your size again!!!\n");
 		return true;
 	}
 	
@@ -281,7 +281,7 @@ bool check_if_real(struct node_t** arr, int x, char z, char direction, int size,
 		
 		for(int i = 0; i < size; i++){
 			if(arr[x][y - i].hidden_value != 'X'){
-				printf("There\'s no ship!");
+				printf("There\'s no ship!\n");
 				return true;
 			}
 		}
@@ -295,7 +295,7 @@ bool check_if_real(struct node_t** arr, int x, char z, char direction, int size,
 		
 		for(int i = 0; i < size; i++){
 			if(arr[x][y + i].hidden_value != 'X'){
-				printf("There\'s no ship!");
+				printf("There\'s no ship!\n");
 				return true;
 			}
 		}
@@ -309,7 +309,7 @@ bool check_if_real(struct node_t** arr, int x, char z, char direction, int size,
 		
 		for(int i = 0; i < size; i++){
 			if(arr[x - i][y].hidden_value != 'X'){
-				printf("There\'s no ship!");
+				printf("There\'s no ship!\n");
 				return true;
 			}
 		}
@@ -323,7 +323,7 @@ bool check_if_real(struct node_t** arr, int x, char z, char direction, int size,
 		
 		for(int i = 0; i < size; i++){
 			if(arr[x + i][y].hidden_value != 'X'){
-				printf("There\'s no ship!");
+				printf("There\'s no ship!\n");
 				return true;
 			}
 		}
@@ -339,7 +339,7 @@ bool check_if_occupied(struct node_t** arr, int x, char z, char direction, int s
 	if(direction == 'U'){
 		for(int i = 0; i < size; i++){
 			if(arr[x - i][y].valid){
-				printf("Occupied already!!!");
+				printf("Occupied already or too close to another ship!!!\n");
 				return true;
 			}
 		}
@@ -348,7 +348,7 @@ bool check_if_occupied(struct node_t** arr, int x, char z, char direction, int s
 	if(direction == 'D'){
 		for(int i = 0; i < size; i++){
 			if(arr[x + i][y].valid){
-				printf("Occupied already!!!");
+				printf("Occupied already or too close to another ship!!!\n");
 				return true;
 			}
 		}
@@ -357,7 +357,7 @@ bool check_if_occupied(struct node_t** arr, int x, char z, char direction, int s
 	if(direction == 'R'){
 		for(int i = 0; i < size; i++){
 			if(arr[x][y + i].valid){
-				printf("Occupied already!!!");
+				printf("Occupied already or too close to another ship!!!\n");
 				return true;
 			}
 		}
@@ -366,7 +366,7 @@ bool check_if_occupied(struct node_t** arr, int x, char z, char direction, int s
 	if(direction == 'L'){
 		for(int i = 0; i < size; i++){
 			if(arr[x][y - i].valid){
-				printf("Occupied already!!!");
+				printf("Occupied already or too close to another ship!!!\n");
 				return true;
 			}
 		}
@@ -382,7 +382,7 @@ void paste_ship_in_map(struct node_t** arr, int x, char z, char direction, int s
 		for(int i = 0; i < size; i++){
 			arr[x - i][y].hidden_value = 'X';
 			arr[x - i][y].ship_type = size;
-			validate_surrounding_cells(arr, x, y);
+			validate_surrounding_cells(arr, (x - i), y);
 		}
 	}
 	
@@ -390,7 +390,7 @@ void paste_ship_in_map(struct node_t** arr, int x, char z, char direction, int s
 		for(int i = 0; i < size; i++){
 			arr[x + i][y].hidden_value = 'X';
 			arr[x + i][y].ship_type = size;
-			validate_surrounding_cells(arr, x, y);
+			validate_surrounding_cells(arr, (x + i), y);
 		}
 	}
 	
@@ -398,7 +398,7 @@ void paste_ship_in_map(struct node_t** arr, int x, char z, char direction, int s
 		for(int i = 0; i < size; i++){
 			arr[x][y + i].hidden_value = 'X';
 			arr[x][y + i].ship_type = size;
-			validate_surrounding_cells(arr, x, y);
+			validate_surrounding_cells(arr, x, (y + i));
 		}
 	}
 	
@@ -406,7 +406,7 @@ void paste_ship_in_map(struct node_t** arr, int x, char z, char direction, int s
 		for(int i = 0; i < size; i++){
 			arr[x][y - i].hidden_value = 'X';
 			arr[x][y - i].ship_type = size;
-			validate_surrounding_cells(arr, x, y);
+			validate_surrounding_cells(arr, x, (y - i));
 		}
 	}
 	
@@ -418,7 +418,7 @@ void ask_for_ship(struct node_t** arr, int* ships_left){
 	
 	do{
 		do{
-			printf("Enter starting point(example 4A), direction(U, D, L, R), size of the new ship: ");
+			printf("Enter starting point(example 4A), direction(U, D, L, R), size of the new ship: "); //9G R 2
 			scanf("%d%c %c %d", &x, &y, &direction, &size);
 			scanf("%c", &prevent_enter_entered);
 			
@@ -449,7 +449,7 @@ void remove_from_board(struct node_t** arr, int x, char z, char direction, int s
 		for(int i = 0; i < size; i++){
 			arr[x - i][y].hidden_value = 'O';
 			arr[x - i][y].ship_type = 0;
-			reverse_validate_surrounding_cells(arr, x, y);
+			reverse_validate_surrounding_cells(arr, (x - i), y);
 		}
 	}
 	
@@ -457,7 +457,7 @@ void remove_from_board(struct node_t** arr, int x, char z, char direction, int s
 		for(int i = 0; i < size; i++){
 			arr[x + i][y].hidden_value = 'O';
 			arr[x + i][y].ship_type = 0;
-			reverse_validate_surrounding_cells(arr, x, y);
+			reverse_validate_surrounding_cells(arr, (x + i), y);
 		}
 	}
 	
@@ -465,7 +465,7 @@ void remove_from_board(struct node_t** arr, int x, char z, char direction, int s
 		for(int i = 0; i < size; i++){
 			arr[x][y + i].hidden_value = 'O';
 			arr[x][y + i].ship_type = 0;
-			reverse_validate_surrounding_cells(arr, x, y);
+			reverse_validate_surrounding_cells(arr, x, (y + i));
 		}
 	}
 	
@@ -473,7 +473,7 @@ void remove_from_board(struct node_t** arr, int x, char z, char direction, int s
 		for(int i = 0; i < size; i++){
 			arr[x][y - i].hidden_value = 'O';
 			arr[x][y - i].ship_type = 0;
-			reverse_validate_surrounding_cells(arr, x, y);
+			reverse_validate_surrounding_cells(arr, x, (y - i));
 		}
 	}
 }

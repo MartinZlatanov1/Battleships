@@ -413,12 +413,19 @@ void paste_ship_in_map(struct node_t** arr, int x, char z, char direction, int s
 }
 
 void ask_for_ship(struct node_t** arr, int* ships_left){
+	printf("Ships you have left to put in place(number ships x size):");
+	for(int i = 0, k = 2; i < 5; i++, k++){
+		if(i != 3){
+			printf("%dx%d ", ships_left[i], k);
+		}
+	}
+	
 	int x, size;
 	char y, direction, prevent_enter_entered;
 	
 	do{
 		do{
-			printf("Enter starting point(example 4A), direction(U, D, L, R), size of the new ship: ");
+			printf("\nEnter starting point(example 4A), direction(U, D, L, R), size of the new ship: ");
 			scanf("%d%c %c %d", &x, &y, &direction, &size);
 			scanf("%c", &prevent_enter_entered);
 			

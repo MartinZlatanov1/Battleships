@@ -14,7 +14,7 @@ struct node_t {
 
 
 void print_board(struct node_t** arr, bool hidden){
-	printf("	A ");
+	printf("\033[93;1m	A ");
 	
 	for(int i = 2; i < 11; i++){
 		printf("%c ", 'A' + i - 1);
@@ -23,11 +23,16 @@ void print_board(struct node_t** arr, bool hidden){
 	printf("\n\n");
 	
 	for(int i = 1; i < 11; i++){
-		printf("%d	", i);
+		printf("\033[32;1m%d	\033[0m", i);
 		
 		for(int j = 1; j < 11; j++){
 			if (hidden){
-				printf("%c ", arr[i][j].hidden_value);
+				if (arr[i][j].hidden_value == 'O'){
+					printf("\033[36;1mO \033[0m");
+				}
+				else{
+					printf("X ");
+				}
 			}
 			else{
 				printf("%c ", arr[i][j].value);
@@ -205,6 +210,7 @@ bool verify_data(int x, char y, char direction, int size, int* ships_left){
 	
 	if(!ships_left[size - 2]){
 		printf("No more ships left of that size!!!\n");
+		return true;
 	}
 	
 	if(direction == 'L' && (y - 'A' + 1) < size){
@@ -425,7 +431,7 @@ void ask_for_ship(struct node_t** arr, int* ships_left){
 	
 	do{
 		do{
-			printf("\nEnter starting point(example 4A), direction(U, D, L, R), size of the new ship: ");
+			printf("\nEnter starting point(example \033[32;1m4\033[93;1mA\033[0m), direction(U, D, L, R), size of the new ship: ");
 			scanf("%d%c %c %d", &x, &y, &direction, &size);
 			scanf("%c", &prevent_enter_entered);
 			
@@ -546,6 +552,7 @@ void enter_map(struct node_t** arr){
 					ask_for_ship(arr, ships_left);
 				}
 				else{
+					//system("clear");
 					entering_map = false;
 				}
 				

@@ -103,7 +103,27 @@ The first 10 lines should be 10 characters of O's and X's and an enter. The rest
 	return false;
 }
 
-bool check_ships (struct node_t **arr){
+void find_ship_type_horizontally(struct node_t **arr, int x, int y){
+	int i = 0;
+	while (arr[x][y + i].hidden_value == 'X'){
+		i++;
+	}
+	for (int j = 0; j < i; j++){
+		arr[x][y + j].ship_type = i;
+	}
+}
+
+void find_ship_type_vertically(struct node_t **arr, int x, int y){
+	int i = 0;
+	while (arr[x + i][y].hidden_value == 'X'){
+		i++;
+	}
+	for (int j = 0; j < i; j++){
+		arr[x + j][y].ship_type = i;
+	}
+}
+
+bool check_ships (struct node_t **arr, int *ships_left){
 	int num_of_x = 0;
 	for (int i = 1; i < 11; i++){
 		for (int j = 1; j < 11; j++){
@@ -124,6 +144,15 @@ bool check_ships (struct node_t **arr){
 					game_over = true;
 					return true;
 				}
+				if (!arr[i][j].ship_type && arr[i][j].valid == 1){
+					if (arr[i][j + 1].hidden_value == 'X'){
+						find_ship_type_horizontally(arr, i, j);
+					}
+					if (arr[i + 1][j].hidden_value == 'X'){
+						find_ship_type_vertically(arr, i, j);
+					}
+					ships_left[arr[i][j].ship_type - 2]--;
+				}
 			}
 		}
 	}
@@ -131,6 +160,12 @@ bool check_ships (struct node_t **arr){
 		printf("Not enough or too many ships!\n");
 		game_over = true;
 		return true;
+	}
+	for (int i = 0; i < 5; i++){
+		if (!ships_left[i]){
+			continue;
+		}
+		printf("Too many or too few ships of size %d\n", i + 2);
 	}
 	return false;
 }
@@ -219,6 +254,7 @@ bool verify_data(int x, char y, char direction, int size, int* ships_left){
 		
 		for(int i = 0; i < size; i++){
 			if(arr[x][y - i].hidden_value != 'X'){
+				printf("There\'s no ship!");
 				return true;
 			}
 		}
@@ -232,6 +268,7 @@ bool verify_data(int x, char y, char direction, int size, int* ships_left){
 		
 		for(int i = 0; i < size; i++){
 			if(arr[x][y + i].hidden_value != 'X'){
+				printf("There\'s no ship!");
 				return true;
 			}
 		}
@@ -245,6 +282,7 @@ bool verify_data(int x, char y, char direction, int size, int* ships_left){
 		
 		for(int i = 0; i < size; i++){
 			if(arr[x - i][y].hidden_value != 'X'){
+				printf("There\'s no ship!");
 				return true;
 			}
 		}
@@ -258,6 +296,7 @@ bool verify_data(int x, char y, char direction, int size, int* ships_left){
 		
 		for(int i = 0; i < size; i++){
 			if(arr[x + i][y].hidden_value != 'X'){
+				printf("There\'s no ship!");
 				return true;
 			}
 		}
@@ -272,6 +311,7 @@ bool check_if_occupied(struct node_t** arr, int x, char z, char direction, int s
 	if(direction == 'U'){
 		for(int i = 0; i < size; i++){
 			if(arr[x - i][y].valid){
+				printf("Occupied already!!!");
 				return true;
 			}
 		}
@@ -280,6 +320,7 @@ bool check_if_occupied(struct node_t** arr, int x, char z, char direction, int s
 	if(direction == 'D'){
 		for(int i = 0; i < size; i++){
 			if(arr[x + i][y].valid){
+				printf("Occupied already!!!");
 				return true;
 			}
 		}
@@ -288,6 +329,7 @@ bool check_if_occupied(struct node_t** arr, int x, char z, char direction, int s
 	if(direction == 'R'){
 		for(int i = 0; i < size; i++){
 			if(arr[x][y + i].valid){
+				printf("Occupied already!!!");
 				return true;
 			}
 		}
@@ -296,6 +338,7 @@ bool check_if_occupied(struct node_t** arr, int x, char z, char direction, int s
 	if(direction == 'L'){
 		for(int i = 0; i < size; i++){
 			if(arr[x][y - i].valid){
+				printf("Occupied already!!!");
 				return true;
 			}
 		}
@@ -373,6 +416,7 @@ int yes_ships_left(int* ships_left){
 
 void enter_map(struct node_t** arr){
 	char answer, prevent_enter_entered;
+	int ships_left [] = {4, 3, 2, 0, 1};
 	do {
 		printf("Do you want to enter with a file? (Y/N): ");
 		scanf("%c", &answer);
@@ -383,13 +427,12 @@ void enter_map(struct node_t** arr){
 		if (extract_file (arr)){
 			return ;
 		 }
-		if (check_ships(arr)){
+		if (check_ships(arr, ships_left)){
 			return ;
 		}
 
 	}
 	else{
-		int ships_left [] = {4, 3, 2, 0, 1};
 		bool entering_map = true;
 		
 		do{
@@ -449,7 +492,7 @@ void destroy(struct node_t **arr){
 int main(){
 	struct node_t** arr1 = create_board();
 	enter_map(arr1);
-	print_board(arr1, false);
+	print_board(arr1, true);
 	destroy (arr1);
 	return 0;
 }

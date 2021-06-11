@@ -418,7 +418,7 @@ void ask_for_ship(struct node_t** arr, int* ships_left){
 	
 	do{
 		do{
-			printf("Enter starting point(example 4A), direction(U, D, L, R), size of the new ship: "); //9G R 2
+			printf("Enter starting point(example 4A), direction(U, D, L, R), size of the new ship: ");
 			scanf("%d%c %c %d", &x, &y, &direction, &size);
 			scanf("%c", &prevent_enter_entered);
 			

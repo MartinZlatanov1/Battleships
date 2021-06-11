@@ -67,6 +67,18 @@ void validate_surrounding_cells (struct node_t **arr, int x, int y){
 	arr[x + 1][y - 1].valid++;
 	arr[x + 1][y].valid++;
 	arr[x + 1][y + 1].valid++;
+	
+}
+
+void reverse_validate_surrounding_cells (struct node_t **arr, int x, int y){
+	arr[x - 1][y - 1].valid--;
+	arr[x - 1][y].valid--;
+	arr[x - 1][y + 1].valid--;
+	arr[x][y - 1].valid--;
+	arr[x][y + 1].valid--;
+	arr[x + 1][y - 1].valid--;
+	arr[x + 1][y].valid--;
+	arr[x + 1][y + 1].valid--;
 }
 
 bool extract_file(struct node_t **arr){
@@ -218,7 +230,7 @@ bool verify_data(int x, char y, char direction, int size, int* ships_left){
 	return false;
 }
 
-/*bool check_if_real(struct node_t** arr, int x, char z, char direction, int size, int* ships_left){
+bool check_if_real(struct node_t** arr, int x, char z, char direction, int size, int* ships_left){
 	int y = z - 'A' + 1;
 	
 	if(x < 1 || x > 10){
@@ -238,6 +250,21 @@ bool verify_data(int x, char y, char direction, int size, int* ships_left){
 	
 	if(arr[x][y].ship_type != size){
 		printf("Check your size again!!!\n");
+		return true;
+	}
+	
+	bool flag = true;
+	
+	for(int i = 0; i < 5; i++){
+		if(ships_left[i] == (i + 2) || i == 3){
+			continue;
+		}
+		
+		flag = false;
+	}
+	
+	if(flag){
+		printf("Empty map!!!\n");
 		return true;
 	}
 	
@@ -302,8 +329,9 @@ bool verify_data(int x, char y, char direction, int size, int* ships_left){
 		}
 	}
 	
+	printf("The removal was successful!!!\n");
 	return false;
-}*/
+}
 
 bool check_if_occupied(struct node_t** arr, int x, char z, char direction, int size){
 	int y = z - 'A' + 1;
@@ -390,7 +418,7 @@ void ask_for_ship(struct node_t** arr, int* ships_left){
 	
 	do{
 		do{
-			printf("Enter starting point(example 4A), direction(U, D, L, R), size: ");
+			printf("Enter starting point(example 4A), direction(U, D, L, R), size of the new ship: ");
 			scanf("%d%c %c %d", &x, &y, &direction, &size);
 			scanf("%c", &prevent_enter_entered);
 			
@@ -412,6 +440,59 @@ int yes_ships_left(int* ships_left){
 	}
 	
 	return sum;
+}
+
+void remove_from_board(struct node_t** arr, int x, char z, char direction, int size){
+	int y = z - 'A' + 1;
+	
+	if(direction == 'U'){
+		for(int i = 0; i < size; i++){
+			arr[x - i][y].hidden_value = 'O';
+			arr[x - i][y].ship_type = 0;
+			reverse_validate_surrounding_cells(arr, x, y);
+		}
+	}
+	
+	if(direction == 'D'){
+		for(int i = 0; i < size; i++){
+			arr[x + i][y].hidden_value = 'O';
+			arr[x + i][y].ship_type = 0;
+			reverse_validate_surrounding_cells(arr, x, y);
+		}
+	}
+	
+	if(direction == 'R'){
+		for(int i = 0; i < size; i++){
+			arr[x][y + i].hidden_value = 'O';
+			arr[x][y + i].ship_type = 0;
+			reverse_validate_surrounding_cells(arr, x, y);
+		}
+	}
+	
+	if(direction == 'L'){
+		for(int i = 0; i < size; i++){
+			arr[x][y - i].hidden_value = 'O';
+			arr[x][y - i].ship_type = 0;
+			reverse_validate_surrounding_cells(arr, x, y);
+		}
+	}
+}
+
+void remove_ship(struct node_t** arr, int* ships_left){
+	int x, size;
+	char y, direction, prevent_enter_entered;
+	
+	do{
+		printf("Enter parameters of the ship for removal: ");
+		scanf("%d%c %c %d", &x, &y, &direction, &size);
+		scanf("%c", &prevent_enter_entered);
+			
+	}
+	while(check_if_real(arr, x, y, direction, size, ships_left));
+	
+	remove_from_board(arr, x, y, direction, size);
+	
+	ships_left[size - 2]++;
 }
 
 void enter_map(struct node_t** arr){
@@ -464,9 +545,10 @@ void enter_map(struct node_t** arr){
 				break;
 			
 			case 'b':
-				//Delete ship
+				remove_ship(arr, ships_left);
 				
 				ask_for_ship(arr, ships_left);
+				
 				break;
 			
 			case 'c':
@@ -492,7 +574,7 @@ void destroy(struct node_t **arr){
 int main(){
 	struct node_t** arr1 = create_board();
 	enter_map(arr1);
-	print_board(arr1, true);
+	print_board(arr1, false);
 	destroy (arr1);
 	return 0;
 }

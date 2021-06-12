@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <time.h>
 
 bool game_over = false;
 
@@ -578,6 +579,80 @@ void enter_map(struct node_t** arr){
 	}
 }
 
+bool valid_position(struct node_t **arr, int x, int y, char direction, int size){
+	if(direction == 'L' && y < size){
+		return true;
+	}
+	
+	if(direction == 'R' && 10 - y < size){
+		return true;
+	}
+	
+	if(direction == 'U' && x < size){
+		return true;
+	}
+	
+	if(direction == 'D' && (10 - x + 1) < size){
+		return true;
+	}
+	if(direction == 'U'){
+		for(int i = 0; i < size; i++){
+			if(arr[x - i][y].valid){
+				return true;
+			}
+		}
+	}
+	
+	if(direction == 'D'){
+		for(int i = 0; i < size; i++){
+			if(arr[x + i][y].valid){
+				return true;
+			}
+		}
+	}
+	
+	if(direction == 'R'){
+		for(int i = 0; i < size; i++){
+			if(arr[x][y + i].valid){
+				return true;
+			}
+		}
+	}
+	
+	if(direction == 'L'){
+		for(int i = 0; i < size; i++){
+			if(arr[x][y - i].valid){
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+void auto_generate_map(struct node_t **arr){
+	int ships_left[] = {4, 3, 2, 0, 1};
+	char directions[4] = {'U', 'D', 'R', 'L'};
+	int x, y, i = 4;
+	char direction;
+	srand(time(0));
+	do{
+		if (!ships_left[i]){
+			i--;
+			continue;
+		}
+		do{
+			x = rand() % 10 + 1;
+			y = rand() % 10 + 1;
+			direction = directions[rand() % 4];
+		}
+		while (valid_position(arr, x, y, direction, i + 2));
+		paste_ship_in_map(arr, x, (y + 'A' - 1), direction, i + 2);
+		ships_left[i]--;
+	}
+	while(yes_ships_left(ships_left));
+	
+}
+
 void destroy(struct node_t **arr){
 	for (int i = 0; i < 12; i++){
 		free (arr[i]);
@@ -587,8 +662,8 @@ void destroy(struct node_t **arr){
 
 int main(){
 	struct node_t** arr1 = create_board();
-	enter_map(arr1);
-	print_board(arr1, false);
+	auto_generate_map(arr1);
+	print_board(arr1, true);
 	destroy (arr1);
 	return 0;
 }

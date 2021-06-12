@@ -788,11 +788,80 @@ void auto_generate_map(struct node_t **arr){
 
 }
 
+void player_turn(struct node_t **arr, int *num_of_x){
+	char prevent_enter_enetred, z;
+	int x, y;
+	if (game_over){
+		return ;
+	}
+	do{
+		printf("Please enter cords (exaple 4A): ");
+		scanf ("%d%c", &x, &z);
+		scanf("%c", &prevent_enter_enetred);
+		y = z - 'A' + 1;
+	}
+	while (arr[x][y].value != '*');
+	
+	arr[x][y].value = arr[x][y].hidden_value;
+	if (arr[x][y].value == 'X'){
+		(*num_of_x)++;
+		game_over = *num_of_x == 31;		
+		player_turn(arr, num_of_x);
+	}
+}
+
+void computer_turn(struct node_t **arr, int *num_of_x){
+	int x, y;
+	if (game_over){
+		return ;
+	}
+	do {
+		x = rand() % 10 + 1;
+		y = rand() % 10 + 1;
+	}
+	while (arr[x][y].value != '*');
+	
+	arr[x][y].value = arr[x][y].hidden_value;
+	if (arr[x][y].value == 'X'){ // guess_surrounding
+		(*num_of_x)++;
+		game_over = *num_of_x == 31;
+		computer_turn(arr, num_of_x);
+	}
+}
+
 void destroy(struct node_t **arr){
 	for (int i = 0; i < 12; i++){
 		free (arr[i]);
 	}
 	free (arr);
+}
+
+void singleplayer(){	
+	struct node_t **player = create_board();
+	struct node_t **bot = create_board();
+	auto_generate_map(bot);
+	enter_map(player);
+	int player_x = 0, comp_x = 0;
+	while (!game_over){
+		player_turn(bot, &player_x);
+		printf("Computer\'s board\n");
+		print_board(bot, false);
+		if (game_over){
+			printf("You won");
+			break;
+		}
+		if (!game_over){
+			computer_turn(player, &comp_x);
+			printf("Your board\n");
+			print_board(player, false);
+		}
+		if (game_over){
+			printf("HAA NOOB!");
+		}
+	}
+	printf("\n\n%d\n\n", game_over);
+	destroy(player);
+	destroy(bot);
 }
 
 int main(){

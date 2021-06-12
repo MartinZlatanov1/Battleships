@@ -37,7 +37,12 @@ void print_board(struct node_t** arr, bool hidden){
 				}
 			}
 			else{
-				printf("%c ", arr[i][j].value);
+				if (arr[i][j].hidden_value == 'O'){
+					printf("\033[36;1mO \033[0m");
+				}
+				else{
+					printf("%c ", arr[i][j].value);
+				}
 			}
 		}
 
@@ -201,7 +206,7 @@ bool check_xy (int x, char y){
 	return false;
 }
 
-bool verify_data(int x, char y, char direction, int size, int* ships_left){
+bool check_if_occupied(int x, char y, char direction, int size, int* ships_left){
 
 	if (check_xy (x, y))
     {
@@ -241,6 +246,44 @@ bool verify_data(int x, char y, char direction, int size, int* ships_left){
 	if(direction == 'D' && (10 - x + 1) < size){
 		printf("Not enought space for ship!!!\n");
 		return true;
+	}
+
+	int y = z - 'A' + 1;
+
+	if(direction == 'U'){
+		for(int i = 0; i < size; i++){
+			if(arr[x - i][y].valid){
+				printf("Occupied already or too close to another ship!!!\n");
+				return true;
+			}
+		}
+	}
+
+	if(direction == 'D'){
+		for(int i = 0; i < size; i++){
+			if(arr[x + i][y].valid){
+				printf("Occupied already or too close to another ship!!!\n");
+				return true;
+			}
+		}
+	}
+
+	if(direction == 'R'){
+		for(int i = 0; i < size; i++){
+			if(arr[x][y + i].valid){
+				printf("Occupied already or too close to another ship!!!\n");
+				return true;
+			}
+		}
+	}
+
+	if(direction == 'L'){
+		for(int i = 0; i < size; i++){
+			if(arr[x][y - i].valid){
+				printf("Occupied already or too close to another ship!!!\n");
+				return true;
+			}
+		}
 	}
 
 	return false;
@@ -349,48 +392,6 @@ bool check_if_real(struct node_t** arr, int x, char z, char direction, int size,
 	return false;
 }
 
-bool check_if_occupied(struct node_t** arr, int x, char z, char direction, int size){
-	int y = z - 'A' + 1;
-
-	if(direction == 'U'){
-		for(int i = 0; i < size; i++){
-			if(arr[x - i][y].valid){
-				printf("Occupied already or too close to another ship!!!\n");
-				return true;
-			}
-		}
-	}
-
-	if(direction == 'D'){
-		for(int i = 0; i < size; i++){
-			if(arr[x + i][y].valid){
-				printf("Occupied already or too close to another ship!!!\n");
-				return true;
-			}
-		}
-	}
-
-	if(direction == 'R'){
-		for(int i = 0; i < size; i++){
-			if(arr[x][y + i].valid){
-				printf("Occupied already or too close to another ship!!!\n");
-				return true;
-			}
-		}
-	}
-
-	if(direction == 'L'){
-		for(int i = 0; i < size; i++){
-			if(arr[x][y - i].valid){
-				printf("Occupied already or too close to another ship!!!\n");
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
-
 void paste_ship_in_map(struct node_t** arr, int x, char z, char direction, int size){
 	int y = z - 'A' + 1;
 
@@ -440,15 +441,11 @@ void ask_for_ship(struct node_t** arr, int* ships_left){
 	char y, direction, prevent_enter_entered;
 
 	do{
-		do{
-			printf("\nEnter starting point(example \033[32;1m4\033[93;1mA\033[0m), direction(U, D, L, R), size of the new ship: ");
-			scanf("%d%c %c %d", &x, &y, &direction, &size);
-			scanf("%c", &prevent_enter_entered);
-
-		}
-		while(verify_data(x, y, direction, size, ships_left));
+		printf("\nEnter starting point(example \033[32;1m4\033[93;1mA\033[0m), direction(U, D, L, R), size of the new ship: ");
+		scanf("%d%c %c %d", &x, &y, &direction, &size);
+		scanf("%c", &prevent_enter_entered);
 	}
-	while(check_if_occupied(arr, x, y, direction, size));
+	while(check_if_occupied(arr, x, y, direction, size, ships_left));
 
 	paste_ship_in_map(arr, x, y, direction, size);
 
@@ -562,7 +559,7 @@ void enter_map(struct node_t** arr){
 					ask_for_ship(arr, ships_left);
 				}
 				else{
-					//system("clear");
+					system("clear");
 					entering_map = false;
 				}
 
@@ -586,7 +583,6 @@ void enter_map(struct node_t** arr){
 		}
 		while(entering_map);
 	}
-	//system("cls");
 	system("clear");
 }
 
@@ -746,7 +742,7 @@ int main(){
     }
 
     if(!game_over){
-        printf("\n            Let the game begin!!!\n");
+        printf("            Let the game begin!!!\n");
     }
 
     while(!game_over){
@@ -757,3 +753,4 @@ int main(){
 	destroy (arr_B);
 	return 0;
 }
+

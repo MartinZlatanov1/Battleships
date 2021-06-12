@@ -37,12 +37,17 @@ void print_board(struct node_t** arr, bool hidden){
 				}
 			}
 			else{
-				if (arr[i][j].hidden_value == 'O'){
-					printf("\033[36;1mO \033[0m");
-				}
-				else{
-					printf("%c ", arr[i][j].value);
-				}
+                if(arr[i][j].value!= '*'){
+                    if(arr[i][j].value=='O'){
+                        printf("\033[36;1m0 \033[0m");
+                    }
+                    else{
+                        printf("\033[0;31mX \033[0m");
+                    }
+                }
+                else{
+                    printf("%c ", arr[i][j].value);
+                }
 			}
 		}
 
@@ -206,7 +211,7 @@ bool check_xy (int x, char y){
 	return false;
 }
 
-bool check_if_occupied(int x, char y, char direction, int size, int* ships_left){
+bool verify_data(int x, char y, char direction, int size, int* ships_left){
 
 	if (check_xy (x, y))
     {
@@ -246,44 +251,6 @@ bool check_if_occupied(int x, char y, char direction, int size, int* ships_left)
 	if(direction == 'D' && (10 - x + 1) < size){
 		printf("Not enought space for ship!!!\n");
 		return true;
-	}
-
-	int y = z - 'A' + 1;
-
-	if(direction == 'U'){
-		for(int i = 0; i < size; i++){
-			if(arr[x - i][y].valid){
-				printf("Occupied already or too close to another ship!!!\n");
-				return true;
-			}
-		}
-	}
-
-	if(direction == 'D'){
-		for(int i = 0; i < size; i++){
-			if(arr[x + i][y].valid){
-				printf("Occupied already or too close to another ship!!!\n");
-				return true;
-			}
-		}
-	}
-
-	if(direction == 'R'){
-		for(int i = 0; i < size; i++){
-			if(arr[x][y + i].valid){
-				printf("Occupied already or too close to another ship!!!\n");
-				return true;
-			}
-		}
-	}
-
-	if(direction == 'L'){
-		for(int i = 0; i < size; i++){
-			if(arr[x][y - i].valid){
-				printf("Occupied already or too close to another ship!!!\n");
-				return true;
-			}
-		}
 	}
 
 	return false;
@@ -392,6 +359,48 @@ bool check_if_real(struct node_t** arr, int x, char z, char direction, int size,
 	return false;
 }
 
+bool check_if_occupied(struct node_t** arr, int x, char z, char direction, int size){
+	int y = z - 'A' + 1;
+
+	if(direction == 'U'){
+		for(int i = 0; i < size; i++){
+			if(arr[x - i][y].valid){
+				printf("Occupied already or too close to another ship!!!\n");
+				return true;
+			}
+		}
+	}
+
+	if(direction == 'D'){
+		for(int i = 0; i < size; i++){
+			if(arr[x + i][y].valid){
+				printf("Occupied already or too close to another ship!!!\n");
+				return true;
+			}
+		}
+	}
+
+	if(direction == 'R'){
+		for(int i = 0; i < size; i++){
+			if(arr[x][y + i].valid){
+				printf("Occupied already or too close to another ship!!!\n");
+				return true;
+			}
+		}
+	}
+
+	if(direction == 'L'){
+		for(int i = 0; i < size; i++){
+			if(arr[x][y - i].valid){
+				printf("Occupied already or too close to another ship!!!\n");
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
 void paste_ship_in_map(struct node_t** arr, int x, char z, char direction, int size){
 	int y = z - 'A' + 1;
 
@@ -441,11 +450,15 @@ void ask_for_ship(struct node_t** arr, int* ships_left){
 	char y, direction, prevent_enter_entered;
 
 	do{
-		printf("\nEnter starting point(example \033[32;1m4\033[93;1mA\033[0m), direction(U, D, L, R), size of the new ship: ");
-		scanf("%d%c %c %d", &x, &y, &direction, &size);
-		scanf("%c", &prevent_enter_entered);
+		do{
+			printf("\nEnter starting point(example \033[32;1m4\033[93;1mA\033[0m), direction(U, D, L, R), size of the new ship: ");
+			scanf("%d%c %c %d", &x, &y, &direction, &size);
+			scanf("%c", &prevent_enter_entered);
+
+		}
+		while(verify_data(x, y, direction, size, ships_left));
 	}
-	while(check_if_occupied(arr, x, y, direction, size, ships_left));
+	while(check_if_occupied(arr, x, y, direction, size));
 
 	paste_ship_in_map(arr, x, y, direction, size);
 
@@ -523,6 +536,10 @@ void enter_map(struct node_t** arr){
 		printf("Do you want to enter with a file? (Y/N): ");
 		scanf("%c", &answer);
 		scanf("%c", &prevent_enter_entered);
+
+        if(!(answer == 'Y' || answer == 'N')){
+            printf("Unexisting option!");
+        }
 	}
 	while (!(answer == 'Y' || answer == 'N'));
 	if(answer == 'Y'){
@@ -559,7 +576,6 @@ void enter_map(struct node_t** arr){
 					ask_for_ship(arr, ships_left);
 				}
 				else{
-					system("clear");
 					entering_map = false;
 				}
 
@@ -583,25 +599,79 @@ void enter_map(struct node_t** arr){
 		}
 		while(entering_map);
 	}
+	//system("cls");
 	system("clear");
 }
 
 bool check_the_guess (struct node_t** arr, int x, char z){
     int y = z - 'A' + 1;
     char prevent_enter_entered;
+    char prev= arr[x][y].value;
+    char input[2];
+    bool flag= false;
 
     arr[x][y].value = arr[x][y].hidden_value;
-    if (arr[x][y].hidden_value == 'O')
+    if (arr[x][y].hidden_value == 'O' && prev == '*')
     {
         return false;
     }
-    else
-    {
-        printf("Enter next point(example \033[32;1m4\033[93;1mA\033[0m): ");
-        scanf("%d%c", &x, &z);
-        scanf("%c", &prevent_enter_entered);
-        return check_the_guess(arr, x, z);
+    else{
+
+        if (prev != '*')
+        {
+            printf("Already guessed!!!\n");
+            printf("Try again!\n");
+        }
+
+        printf("Enter new point or direction to previous(U, D, L, R): ");
+        scanf("%c%c", &input[0], &input[1]);
+
+        if(input[1]== '\n'){
+        	
+            do{
+                switch(input[0]){
+                case 'U':
+                    if (x!=1){
+                        x--;
+                        flag = false;
+                    }
+                    break;
+                case 'D':
+                    if (x!=10){
+                        x++;
+                        flag = false;
+                    }break;
+                case 'L':
+                    if(y!=1){
+                        y--;
+                        z = y + 'A' - 1;
+                        flag = false;
+                    }break;
+                case 'R':
+                    if(y!=10){
+                        y++;
+                        z = y + 'A' - 1;
+                        flag= false;
+                    }break;
+                default:
+                    printf("Invalid direction!!!\n");
+                    flag= true;
+                    printf("Enter correct direction(U, D, L, R): ");
+                    scanf("%c", &input[1]);
+                    scanf("%c", &prevent_enter_entered);
+                    break;
+                }
+            }while(flag);
+        }
+        else{
+        	scanf("%c", &prevent_enter_entered);
+           x = input[0]-'0';
+           z = input[1];
+        }
     }
+
+
+    return check_the_guess(arr, x, z);
     return false;
 }
 
@@ -610,9 +680,17 @@ void player(struct node_t **arr)
     char y, prevent_enter_entered;
     int x, answer;
 
-    printf("1. Show other player\'s board\n2. Make your guess\nEnter option: ");
-    scanf("%d", &answer);
-    scanf("%c", &prevent_enter_entered);
+    do{
+        printf("1. Show other player\'s board\n2. Make your guess\nEnter option: ");
+        scanf("%d", &answer);
+        scanf("%c", &prevent_enter_entered);
+
+        if (!(answer == 1 || answer== 2))
+        {
+            printf("Unexisting option!\n");
+        }
+
+    }while(!(answer == 1 || answer == 2));
 
     if(prevent_enter_entered != '\n'){
         answer = prevent_enter_entered;
@@ -624,28 +702,18 @@ void player(struct node_t **arr)
         break;
 
     case 2:
-        ///if
             do {
                 printf("Enter point(example \033[32;1m4\033[93;1mA\033[0m): ");
                 scanf("%d%c", &x, &y);
                 scanf("%c", &prevent_enter_entered);
             }while (check_xy(x, y));
        check_the_guess(arr, x, y);
-        ///else
         break;
         }
         //system("cls");
         system("clear");
 }
 
-void start_game_for_two (struct node_t **arrA, struct node_t **arrB)
-{
-    printf("Player A\n");
-    player(arrB);
-    printf("Player B\n");
-    player(arrA);
-
-}
 bool valid_position(struct node_t **arr, int x, int y, char direction, int size){
 	if(direction == 'L' && y < size){
 		return true;
@@ -733,24 +801,26 @@ int main(){
 	//system("cls");
 	system("clear");
 
-	printf("Player A please enter your map\n");
+	printf("Player A please enter your map!\n");
     enter_map(arr_A);
     if(!game_over){
 
-        printf("Player B please enter your map\n");
+        printf("Player B please enter your map!\n");
         enter_map(arr_B);
     }
 
     if(!game_over){
-        printf("            Let the game begin!!!\n");
+        printf("Let the game begin!!!\n");
     }
 
     while(!game_over){
-        start_game_for_two (arr_A, arr_B);
+        printf("Player A\n");
+        player(arr_B);
+        printf("Player B\n");
+        player(arr_A);
     }
 
 	destroy (arr_A);
 	destroy (arr_B);
 	return 0;
 }
-

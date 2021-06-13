@@ -878,7 +878,7 @@ void two_player_game(){
 int main(){
 	int answer;
 	do{
-		printf("Singleplayer or two player mode? ");
+		printf("Singleplayer or two player mode?(1 or 2) ");
 		scanf("%d", &answer);
 		getc(stdin);
 	}

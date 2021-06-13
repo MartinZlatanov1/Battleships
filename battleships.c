@@ -655,7 +655,7 @@ bool check_the_guess (struct node_t** arr, int x, char z, int *num_of_x){
     }
 
 
-    return check_the_guess(arr, x, z);
+    return check_the_guess(arr, x, z, num_of_x);
 }
 
 void update_surrounding_water (struct node_t **arr, int x, int y){
@@ -745,7 +745,7 @@ void player(struct node_t **arr, int* num_of_x){
     switch(answer){
     case 1:
         print_board(arr, false);
-        player(arr);
+        player(arr, num_of_x);
         break;
 
     case 2:

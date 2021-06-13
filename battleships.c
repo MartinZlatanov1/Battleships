@@ -610,9 +610,7 @@ bool check_the_guess (struct node_t** arr, int x, char z){
 
         printf("Enter new point or direction to previous(U, D, L, R): ");
         scanf("%c%c", &input[0], &input[1]);
-		if (input[1] != '\n'){
-			getc(stdin);
-		}
+
         if(input[1]== '\n'){
         	
             do{
@@ -651,15 +649,14 @@ bool check_the_guess (struct node_t** arr, int x, char z){
             }while(flag);
         }
         else{
-        	getc(stdin);
-           x = input[0]-'0';
-           z = input[1];
+			getc(stdin);
+			x = input[0]-'0';
+			z = input[1];
         }
     }
 
 
     return check_the_guess(arr, x, z);
-    return false;
 }
 
 void player(struct node_t **arr)

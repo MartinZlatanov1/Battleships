@@ -456,7 +456,7 @@ void ask_for_ship(struct node_t** arr, int* ships_left){
 	ships_left[size - 2]--;
 }
 
-int yes_ships_left(int* ships_left){
+bool yes_ships_left(int* ships_left){
 	for(int i = 0; i < 5; i++){
 		if (ships_left[i]){
 			return true;
@@ -771,25 +771,42 @@ void auto_generate_map(struct node_t **arr){
 	while(yes_ships_left(ships_left));
 }
 
-void player_turn(struct node_t **arr, int *num_of_x){
+void player_turn(struct node_t **computer_map, struct node_t **player_map int *num_of_x){
 	char z;
 	int x, y;
 	if (game_over){
 		return ;
 	}
-	do{
-		printf("Please enter cords (exaple 4A): ");
-		scanf ("%d%c", &x, &z);
-		getc(stdin);
-		y = z - 'A' + 1;
-	}
-	while (arr[x][y].value != '*');
-	
-	arr[x][y].value = arr[x][y].hidden_value;
-	if (arr[x][y].value == 'X'){
-		(*num_of_x)++;
-		game_over = *num_of_x == 31;		
-		player_turn(arr, num_of_x);
+	switch (answer){
+	case 'a':
+		do{
+			printf("Please enter cords (exaple 4A): ");
+			scanf ("%d%c", &x, &z);
+			getc(stdin);
+			y = z - 'A' + 1;
+		}
+		while (arr[x][y].value != '*');
+		
+		arr[x][y].value = arr[x][y].hidden_value;
+		if (arr[x][y].value == 'X'){
+			(*num_of_x)++;
+			game_over = *num_of_x == 31;		
+			player_turn(arr, num_of_x);
+		}
+		break;
+	case 'b':
+		printf("Computer\'s board:\n");
+		print_board(computer_map, false);
+		player_turn(computer_map, player_map, num_of_x);
+		break;
+	case 'c':
+		printf("Your board:\n");
+		print_board(player_map, false);
+		player_turn(computer_map, player_map, num_of_x);
+		break;
+	default:
+		printf("Incorrect option!\n");
+		player_turn(computer_map, player_map, num_of_x);
 	}
 }
 
@@ -826,7 +843,7 @@ void singleplayer(){
 	enter_map(player);
 	int player_x = 0, comp_x = 0;
 	while (!game_over){
-		player_turn(bot, &player_x);
+		player_turn(bot, player, &player_x);
 		printf("Computer\'s board\n");
 		print_board(bot, false);
 		if (game_over){
@@ -839,7 +856,7 @@ void singleplayer(){
 			print_board(player, false);
 		}
 		if (game_over){
-			printf("\033[97;1mHAA NOOB!\033[0m");
+			printf("\033[93;1mHAA NOOB!\033[0m");
 		}
 	}
 	destroy(player);

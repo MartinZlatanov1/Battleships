@@ -663,10 +663,10 @@ void update_for_sunked_ships(struct node_t **arr){
 	int size;
 	for (int i = 1; i < 11; i++){
 		for (int j = 1; j < 11; j++){
-			if (arr[i][j].hidden_value == 'X' && arr[i][j].ship_type && arr[i][j].valid == 1){
+			if (arr[i][j].value == 'X' && arr[i][j].ship_type && arr[i][j].valid == 1){
 				flag = true;
 				size = arr[i][j].ship_type;
-				if (arr[i + 1][j].hidden_value == 'X'){
+				if (arr[i + 1][j].value == 'X'){
 					for (int k = 0; k < size; k++){
 						if (arr[i + k][j].value != 'X'){
 							flag = false;
@@ -680,7 +680,7 @@ void update_for_sunked_ships(struct node_t **arr){
 						printf("The ship is underwater!!!\n");
 					}
 				}
-				if (arr[i][j + 1].hidden_value){
+				if (arr[i][j + 1].value){
 					for (int k = 0; k < size; k++){
 						if (arr[i][j + k].value != 'X'){
 							flag = false;
@@ -773,7 +773,7 @@ void auto_generate_map(struct node_t **arr){
 }
 
 bool make_a_guess(struct node_t **arr, int *last_p){
-	char input[3];
+	char input[4];
 	int x = 0, y;
 	for (int i = 0; i < 4; i++){
 		input[i] = 0;
@@ -786,7 +786,7 @@ bool make_a_guess(struct node_t **arr, int *last_p){
         		break;
         	}
         }
-        if (input[4] == '\n'){
+        if (input[3] == '\n'){
         	x = 10;
         }
     }
@@ -819,6 +819,10 @@ bool make_a_guess(struct node_t **arr, int *last_p){
 	else {
 		x = *last_p / 10;
 		y = *last_p % 10;
+		if (!y){
+			x--;
+			y = 10;
+		}
 		if (input[0] == 'U'){
 			if (x == 1){
 				printf("You\'re trying to go to unknown lands!\n");
@@ -845,6 +849,7 @@ bool make_a_guess(struct node_t **arr, int *last_p){
 				printf("You\'re trying to go to unknown lands!\n");
 				return make_a_guess(arr, last_p);
 			}
+			printf("Problem with the %c", input[0]);
 			y++;
 		}
 		else {
@@ -902,7 +907,7 @@ void player_turn(struct node_t **other_map, struct node_t **our_map, int *last_p
 		if (make_a_guess(other_map, last_p)){
 			(*num_of_x)++;
 			game_over = *num_of_x == 31;
-			printf("You hit a ship!");
+			printf("You hit a ship!\n");
 			update_for_sunked_ships(other_map);
 			printf("\nPress enter to continue!\n");
 			while (a != '\n'){

@@ -37,13 +37,11 @@ void print_board(struct node_t** arr, bool hidden){
 				}
 			}
 			else{
-                if(arr[i][j].value!= '*'){
-                    if(arr[i][j].value=='O'){
-                        printf("\033[36;1m0 \033[0m");
-                    }
-                    else{
-                        printf("\033[0;31mX \033[0m");
-                    }
+                if(arr[i][j].value=='O'){
+                    printf("\033[36;1mO \033[0m");
+                }
+                else if (arr[i][j].value=='X'){
+                    printf("\033[31;1mX \033[0m");
                 }
                 else{
                     printf("%c ", arr[i][j].value);
@@ -432,6 +430,51 @@ void paste_ship_in_map(struct node_t** arr, int x, char z, char direction, int s
 
 }
 
+int print_menu(char *options[], int num_of_options, int curr_option){
+	int option[num_of_options];
+	char a;
+	if (curr_option == num_of_options + 1){
+		curr_option = 1;
+	}
+	if (curr_option == 0){
+		curr_option = num_of_options;
+	}
+	system("clear");
+	for (int i = 1; i < num_of_options + 1; i++){
+		option[i] = 8;
+	}
+	option[curr_option] = 5;
+	printf("%s\n", options[0]);
+	for (int i = 1; i < num_of_options + 1; i++){
+		printf("\033[%dm––>\033[0m%s\n", option[i], options[i]);
+	}
+	system("../../../bin/stty raw");
+	do{
+		do{
+		    printf("\033[8m");
+			a = getchar();
+		    printf("\033[0m");
+		}
+		while (a != '[' && a != 13);
+		if (a == 13){
+			break;
+		}
+		a = getchar();
+	}
+	while (a != 'A' && a != 'B');
+	system("../../../bin/stty cooked");
+	if (a == 13){
+		return curr_option;
+	}
+    if (a == 'A'){
+    	curr_option--;
+    }
+	if (a == 'B'){
+    	curr_option++;
+    }
+	return print_menu(options, num_of_options, curr_option);
+}
+
 void ask_for_ship(struct node_t** arr, int* ships_left){
 	printf("Ships you have left to put in place(number ships x size):");
 	for(int i = 0, k = 2; i < 5; i++, k++){
@@ -798,7 +841,7 @@ void auto_generate_map(struct node_t **arr){
 	}
 	while(yes_ships_left(ships_left));
 }
-
+/*
 void make_guess(struct node_t **arr, int last_p){//0
 
     if(last_p){
@@ -829,24 +872,27 @@ void make_guess(struct node_t **arr, int last_p){//0
     }
 
 }
-
+*/
 void player_turn(struct node_t **other_map, struct node_t **our_map, int *num_of_x, bool computer){
-	int answer;
+	int answer, y;
+	char a = ' ';
+	int x;
+	char z;
 	if (game_over){
 		return ;
 	}
 	if (computer){
-		printf("Choose an option:\n1. Check your progress\n2. Make a guess\n3. Check the computer\'s progress\nOption: ");
+		char *options[] = {"Choose an option:", "Check your progress", "Make a guess", "Check the computer\'s progress"};
+		answer = print_menu(options, 3, 1);
 	}
 	else{
-		 printf("1. Show other player\'s board\n2. Make your guess\nEnter option: ");
+		 char *options[] = {"Choose an option:", "Show other player\'s board", "Make your guess"};
+		 answer = print_menu(options, 2, 1);
 	}
-	scanf("%c", &answer);
-	getc(stdin);
 	switch (answer){
 	case 1:
-		system("cls");
-		//system("clear");
+		//system("cls");
+		system("clear");
 		if (computer){
 			printf("Computer\'s board:\n");
 		}
@@ -854,7 +900,13 @@ void player_turn(struct node_t **other_map, struct node_t **our_map, int *num_of
 			printf("Other player\'s board:\n");
 		}
 		print_board(other_map, false);
-		player_turn(computer_map, player_map, num_of_x);
+		printf("\nPress enter to go back to the menu!\n");
+		while (a != '\n'){
+			printf("\033[8m");
+			a = getchar();
+			printf("\033[0m");
+		}
+		player_turn(other_map, our_map, num_of_x, computer);
 		break;
 	case 2:
 		do{
@@ -863,12 +915,12 @@ void player_turn(struct node_t **other_map, struct node_t **our_map, int *num_of
 			getc(stdin);
 			y = z - 'A' + 1;
 		}
-		while (check_xy(x, z) || computer_map[x][y].value != '*');
-		computer_map[x][y].value = computer_map[x][y].hidden_value;
-		if (computer_map[x][y].value == 'X'){
+		while (check_xy(x, z) || other_map[x][y].value != '*');
+		other_map[x][y].value = other_map[x][y].hidden_value;
+		if (other_map[x][y].value == 'X'){
 			(*num_of_x)++;
 			game_over = *num_of_x == 31;
-			update_for_sunked_ships(computer_map);
+			update_for_sunked_ships(other_map);
 			player_turn(other_map, our_map, num_of_x, computer);
 		}
 		break;
@@ -877,11 +929,17 @@ void player_turn(struct node_t **other_map, struct node_t **our_map, int *num_of
 		system("clear");
 		printf("Your board:\n");
 		print_board(our_map, false);
+		printf("\nPress enter to go back to the menu!\n");
+		while (a != '\n'){
+			printf("\033[8m");
+			a = getchar();
+			printf("\033[0m");
+		}
 		player_turn(other_map, our_map, num_of_x, computer);
 		break;
 	default:
 		printf("Invalid option!\n");
-		player_turn(other_map, our_map, num_of_x, computer)
+		player_turn(other_map, our_map, num_of_x, computer);
 	}
 }
 
@@ -917,7 +975,7 @@ void singleplayer(){
 	enter_map(player);
 	int player_x = 0, comp_x = 0;
 	while (!game_over){
-		player_turn(bot, player, &player_x);
+		player_turn(bot, player, &player_x, true);
 		if (game_over){
 			printf("\033[92;1mYou won!!!\033[0m");
 			break;
@@ -955,9 +1013,9 @@ void two_player_game(){
 
     while(!game_over){
         printf("Player A\n");
-        player_turn(arr_B, &correct_guesses_A);
+        player_turn(arr_B, arr_A, &correct_guesses_A, false);
         printf("Player B\n");
-        player_turn(arr_A, &correct_guesses_B);
+        player_turn(arr_A, arr_B, &correct_guesses_B, false);
     }
 
 	destroy (arr_A);
@@ -980,3 +1038,4 @@ int main(){
 	}
 	return 0;
 }
+

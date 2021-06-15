@@ -655,8 +655,8 @@ void update_surrounding_water (struct node_t **arr, int x, int y){
 	}
 }
 
-void update_for_sunken_ships(struct node_t **arr){
-	bool flag;
+bool update_for_sunken_ships(struct node_t **arr){
+	bool flag, ship_destroyed = false;
 	int size;
 	for (int i = 1; i < 11; i++){
 		for (int j = 1; j < 11; j++){
@@ -675,6 +675,7 @@ void update_for_sunken_ships(struct node_t **arr){
 							arr[i + k][j].ship_type = 0;
 						}
 						printf("\033[96;1mThe ship is underwater!!!\033[0m\n");
+						ship_destroyed = true;
 					}
 				}
 				if (arr[i][j + 1].value == ship_symbol){
@@ -689,11 +690,13 @@ void update_for_sunken_ships(struct node_t **arr){
 							arr[i][j + k].ship_type = 0;
 						}
 						printf("\033[96;1mThe ship is underwater!!!\033[0m\n");
+						ship_destroyed = true;
 					}
 				}
 			}
 		}
 	}
+	return ship_destroyed;
 }
 
 bool valid_position(struct node_t **arr, int x, int y, char direction, int size){
@@ -777,25 +780,32 @@ bool make_a_guess(struct node_t **arr, int *last_p){
 	}
     if(*last_p){
         printf("\nEnter new point or direction to previous(U, D, L, R): ");
-        for (int i = 0; i < 4; i++){
-        	input[i] = getchar();
-        	if (input[i] == '\n'){
-        		break;
-        	}
-        }
-        if (input[3] == '\n'){
-        	x = 10;
-        }
+		do{
+			input[0] = getchar();
+		}
+		while (!(input[0] >= '0' && input[0] <= '9') && input[0] != 'U' && input[0] != 'D' && input[0] != 'L' && input[0] != 'R');
     }
     else{
         printf("\nEnter point(example \033[32;1m4\033[93;1mA\033[0m): ");
-        scanf("%c%c%c", &input[0], &input[1], &input[2]);
-        if (input[2] != '\n'){
-        	getc(stdin);
-        	x = 10;
-        }
+		do{
+			input[0] = getchar();
+		}
+		while (input[0] < '1' && input[0] > '9');
     }
-
+	do{
+		input[1] = getchar();
+	}
+	while (input[1] != '0' && !(input[1] >= 'A' && input[1] <= 'J') && input[1] != '\n');
+	if (input[1] != '\n'){
+		do{
+			input[2] = getchar();
+		}
+		while (!(input[2] >= 'A' && input[2] <= 'J') && input[2] != '\n');
+		if (input[2] != '\n'){
+			x = 10;
+			getc(stdin);
+		}
+	}
     if(input[1] != '\n'){
         if (x){
         	y = input[2] - 'A' + 1;
@@ -893,7 +903,7 @@ void player_turn(struct node_t **other_map, struct node_t **our_map, int *last_p
 		//system("cls");
 		system("clear");
 		if (computer){
-			printf("Computer\'s board:\n");
+			printf("\033[94;1mComputer\'s board:\033[0m\n");
 		}
 		else{
 			printf("Other player\'s board:\n");
@@ -908,7 +918,9 @@ void player_turn(struct node_t **other_map, struct node_t **our_map, int *last_p
 			(*num_of_x)++;
 			game_over = *num_of_x == 31;
 			printf("\033[91;1mYou hit a ship!\033[0m\n");
-			update_for_sunken_ships(other_map);
+			if (update_for_sunken_ships(other_map)){
+				*last_p = 0;
+			}
 			printf("\nPress enter to continue!\n");
 			wait_for_enter_pressed();
 			player_turn(other_map, our_map, last_p, num_of_x, computer);
@@ -923,7 +935,7 @@ void player_turn(struct node_t **other_map, struct node_t **our_map, int *last_p
 	case 3:
 		//system("cls");
 		system("clear");
-		printf("Your board:\n");
+		printf("\033[95;1mYour board:\033[0m\n");
 		print_board(our_map, false);
 		printf("\nPress enter to go back to the menu!\n");
 		wait_for_enter_pressed();
@@ -932,7 +944,7 @@ void player_turn(struct node_t **other_map, struct node_t **our_map, int *last_p
 	}
 }
 
-void computer_turn(struct node_t **arr, int *num_of_x){
+void computer_turn(struct node_t **arr, int *last_p, int *num_of_x){
 	int x, y;
 	if (game_over){
 		return ;
@@ -946,7 +958,10 @@ void computer_turn(struct node_t **arr, int *num_of_x){
 	if (arr[x][y].value == ship_symbol){
 		(*num_of_x)++;
 		game_over = *num_of_x == 31;
-		computer_turn(arr, num_of_x);
+		if (update_for_sunken_ships(arr)){
+			*last_p = 0;
+		}
+		computer_turn(arr, last_p, num_of_x);
 	}
 	else{
 		turn++;
@@ -958,30 +973,6 @@ void destroy(struct node_t **arr){
 		free (arr[i]);
 	}
 	free (arr);
-}
-
-void singleplayer(){
-	struct node_t **player = create_board();
-	struct node_t **bot = create_board();
-	auto_generate_map(bot);
-	enter_map(player);
-	int player_x = 0, comp_x = 0, last_p = 0;
-	turn = 1;
-	while (!game_over){
-		player_turn(bot, player, &last_p, &player_x, true);
-		if (game_over){
-			printf("\033[92;1mYou won!!!\033[0m");
-			break;
-		}
-		if (!game_over){
-			computer_turn(player, &comp_x);
-			if (game_over){
-				printf("\033[93;1mHAA NOOB!\033[0m");
-			}
-		}
-	}
-	destroy(player);
-	destroy(bot);
 }
 
 void wait(int i){
@@ -1008,6 +999,31 @@ void turn_change_text(char *str, int text_color, int player_color){
 	wait_for_enter_pressed();
 }
 
+void singleplayer(){
+	struct node_t **player = create_board();
+	struct node_t **bot = create_board();
+	auto_generate_map(bot);
+	turn_change_text("It\'s \n\n time \n\n to \n\n create \n\n your \n\n map!\n\n", 95, 94);
+	enter_map(player);
+	int player_x = 0, comp_x = 0, last_p = 0, comp_p = 0;
+	turn = 1;
+	while (!game_over){
+		player_turn(bot, player, &last_p, &player_x, true);
+		if (game_over){
+			printf("\033[92;1mYou won!!!\033[0m");
+			break;
+		}
+		if (!game_over){
+			computer_turn(player, &comp_p, &comp_x);
+			if (game_over){
+				printf("\033[93;1mHAA NOOB!\033[0m");
+			}
+		}
+	}
+	destroy(player);
+	destroy(bot);
+}
+
 void two_player_game(){
 	struct node_t** arr_A = create_board();
 	struct node_t** arr_B = create_board();
@@ -1015,16 +1031,16 @@ void two_player_game(){
 	//system("cls");
 	system("clear");
 
-	turn_change_text("Player\n\nA\n\ntime\n\nto\n\ncreate\n\nyour\n\nmap!\n", 92, 93);
+	turn_change_text("Player \n\n A \n\n time \n\n to \n\n create \n\n your \n\n map!\n\n", 92, 93);
     enter_map(arr_A);
     if(!game_over){
-        turn_change_text("Player\nB\nplease\nenter\nyour\nmap!\n", 93, 92);
+        turn_change_text("Player \n\n Btime \n\n to \n\n create \n\n your \n\n map!\n\n", 93, 92);
         enter_map(arr_B);
     }
 	turn = 1;
 
     while(!game_over){
-        turn_change_text("It\'s \n\n player \n\n A\'s \n\n turn!", 92, 93);
+        turn_change_text("Player \n\n A \n\n It\'s \n\n your \n\n turn!\n\n", 92, 93);
         player_turn(arr_B, arr_A, &last_p_A, &correct_guesses_A, false);
         if (game_over){
         	system("clear");
@@ -1033,7 +1049,7 @@ void two_player_game(){
         	print_board(arr_B, false);
         }
         if (!game_over){
-        	turn_change_text("It\'s \n\n player \n\n B\'s \n\n turn!", 93, 92);
+        	turn_change_text("Player \n\n B \n\n It\'s \n\n your \n\n turn!\n\n", 93, 92);
         	player_turn(arr_A, arr_B, &last_p_B, &correct_guesses_B, false);
         	if (game_over){
         		system("clear");

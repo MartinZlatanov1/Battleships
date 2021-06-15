@@ -4,6 +4,10 @@
 #include <stdbool.h>
 #include <time.h>
 
+#define not_guessed_symbol '*'
+#define ship_symbol 'X'
+#define water_symbol 'O'
+
 bool game_over = false;
 int turn = 0;
 
@@ -29,7 +33,7 @@ void print_board(struct node_t** arr, bool hidden){
 
 		for(int j = 1; j < 11; j++){
 			if (hidden){
-				if (arr[i][j].hidden_value == 'O'){
+				if (arr[i][j].hidden_value == water_symbol){
 					printf("\033[36;1mO \033[0m");
 
 				}
@@ -38,14 +42,14 @@ void print_board(struct node_t** arr, bool hidden){
 				}
 			}
 			else{
-                if(arr[i][j].value=='O'){
+                if(arr[i][j].value == water_symbol){
                     printf("\033[36;1mO \033[0m");
                 }
-                else if (arr[i][j].value=='X'){
+                else if (arr[i][j].value == ship_symbol){
                     printf("\033[31;1mX \033[0m");
                 }
                 else{
-                    printf("%c ", arr[i][j].value);
+                    printf("* ");
                 }
 			}
 		}
@@ -63,8 +67,8 @@ struct node_t** create_board(){
 
 	for(int i = 0; i < 12; i++){
 		for(int j = 0; j < 12; j++){
-			arr[i][j].hidden_value = 'O';
-			arr[i][j].value = '*';
+			arr[i][j].hidden_value = water_symbol;
+			arr[i][j].value = not_guessed_symbol;
 			arr[i][j].valid = 0;
 			arr[i][j].ship_type = 0;
 		}
@@ -113,13 +117,13 @@ The first 10 lines should be 10 characters of O's and X's and an enter. The rest
 	for (int i = 1; i < 11; i++){
 		for (int j = 1; j < 11; j++){
 			arr[i][j].hidden_value = getc(file);
-			if (!(arr[i][j].hidden_value == 'O' || arr[i][j].hidden_value == 'X')){
+			if (!(arr[i][j].hidden_value == water_symbol || arr[i][j].hidden_value == ship_symbol)){
 				printf("File contains invalid characters!!! (It should only contain O's and X's)%c%d%d\n", arr[i][j].hidden_value, i, j);
 				game_over = true;
 				fclose(file);
 				return true;
 			}
-			if (arr[i][j].hidden_value == 'X'){
+			if (arr[i][j].hidden_value == ship_symbol){
 				validate_surrounding_cells(arr, i, j);
 			}
 		}
@@ -131,7 +135,7 @@ The first 10 lines should be 10 characters of O's and X's and an enter. The rest
 
 void find_ship_type_horizontally(struct node_t **arr, int x, int y){
 	int i = 0;
-	while (arr[x][y + i].hidden_value == 'X'){
+	while (arr[x][y + i].hidden_value == ship_symbol){
 		i++;
 	}
 	for (int j = 0; j < i; j++){
@@ -141,7 +145,7 @@ void find_ship_type_horizontally(struct node_t **arr, int x, int y){
 
 void find_ship_type_vertically(struct node_t **arr, int x, int y){
 	int i = 0;
-	while (arr[x + i][y].hidden_value == 'X'){
+	while (arr[x + i][y].hidden_value == ship_symbol){
 		i++;
 	}
 	for (int j = 0; j < i; j++){
@@ -153,7 +157,7 @@ bool check_ships (struct node_t **arr, int *ships_left){
 	int num_of_x = 0;
 	for (int i = 1; i < 11; i++){
 		for (int j = 1; j < 11; j++){
-			if (arr[i][j].hidden_value == 'X'){
+			if (arr[i][j].hidden_value == ship_symbol){
 				num_of_x++;
 				if (arr[i][j].valid == 0 || arr[i][j].valid > 2){
 					printf("The map is not valid!\n");
@@ -161,20 +165,20 @@ bool check_ships (struct node_t **arr, int *ships_left){
 					return true;
 				}
 				if (arr[i][j].valid == 2){
-					if (arr[i][j - 1].hidden_value == 'X' && arr[i][j + 1].hidden_value == 'X'){
+					if (arr[i][j - 1].hidden_value == ship_symbol && arr[i][j + 1].hidden_value == ship_symbol){
 						continue;
 					}
-					if (arr[i - 1][j].hidden_value == 'X' && arr[i + 1][j].hidden_value == 'X'){
+					if (arr[i - 1][j].hidden_value == ship_symbol && arr[i + 1][j].hidden_value == ship_symbol){
 						continue;
 					}
 					game_over = true;
 					return true;
 				}
 				if (!arr[i][j].ship_type && arr[i][j].valid == 1){
-					if (arr[i][j + 1].hidden_value == 'X'){
+					if (arr[i][j + 1].hidden_value == ship_symbol){
 						find_ship_type_horizontally(arr, i, j);
 					}
-					if (arr[i + 1][j].hidden_value == 'X'){
+					if (arr[i + 1][j].hidden_value == ship_symbol){
 						find_ship_type_vertically(arr, i, j);
 					}
 					ships_left[arr[i][j].ship_type - 2]--;
@@ -319,7 +323,7 @@ bool check_if_real(struct node_t** arr, int x, char z, char direction, int size,
 		return true;
 	}
 
-	if(arr[x][y].hidden_value != 'X'){
+	if(arr[x][y].hidden_value != ship_symbol){
 		printf("This is not a ship!!!\n");
 		return true;
 	}
@@ -341,7 +345,7 @@ bool check_if_real(struct node_t** arr, int x, char z, char direction, int size,
 		}
 
 		for(int i = 0; i < size; i++){
-			if(arr[x][y - i].hidden_value != 'X'){
+			if(arr[x][y - i].hidden_value != ship_symbol){
 				printf("There\'s no ship!\n");
 				return true;
 			}
@@ -355,7 +359,7 @@ bool check_if_real(struct node_t** arr, int x, char z, char direction, int size,
 		}
 
 		for(int i = 0; i < size; i++){
-			if(arr[x][y + i].hidden_value != 'X'){
+			if(arr[x][y + i].hidden_value != ship_symbol){
 				printf("There\'s no ship!\n");
 				return true;
 			}
@@ -369,7 +373,7 @@ bool check_if_real(struct node_t** arr, int x, char z, char direction, int size,
 		}
 
 		for(int i = 0; i < size; i++){
-			if(arr[x - i][y].hidden_value != 'X'){
+			if(arr[x - i][y].hidden_value != ship_symbol){
 				printf("There\'s no ship!\n");
 				return true;
 			}
@@ -383,7 +387,7 @@ bool check_if_real(struct node_t** arr, int x, char z, char direction, int size,
 		}
 
 		for(int i = 0; i < size; i++){
-			if(arr[x + i][y].hidden_value != 'X'){
+			if(arr[x + i][y].hidden_value != ship_symbol){
 				printf("There\'s no ship!\n");
 				return true;
 			}
@@ -399,7 +403,7 @@ void paste_ship_in_map(struct node_t** arr, int x, char z, char direction, int s
 
 	if(direction == 'U'){
 		for(int i = 0; i < size; i++){
-			arr[x - i][y].hidden_value = 'X';
+			arr[x - i][y].hidden_value = ship_symbol;
 			arr[x - i][y].ship_type = size;
 			validate_surrounding_cells(arr, (x - i), y);
 		}
@@ -407,7 +411,7 @@ void paste_ship_in_map(struct node_t** arr, int x, char z, char direction, int s
 
 	if(direction == 'D'){
 		for(int i = 0; i < size; i++){
-			arr[x + i][y].hidden_value = 'X';
+			arr[x + i][y].hidden_value = ship_symbol;
 			arr[x + i][y].ship_type = size;
 			validate_surrounding_cells(arr, (x + i), y);
 		}
@@ -415,7 +419,7 @@ void paste_ship_in_map(struct node_t** arr, int x, char z, char direction, int s
 
 	if(direction == 'R'){
 		for(int i = 0; i < size; i++){
-			arr[x][y + i].hidden_value = 'X';
+			arr[x][y + i].hidden_value = ship_symbol;
 			arr[x][y + i].ship_type = size;
 			validate_surrounding_cells(arr, x, (y + i));
 		}
@@ -423,7 +427,7 @@ void paste_ship_in_map(struct node_t** arr, int x, char z, char direction, int s
 
 	if(direction == 'L'){
 		for(int i = 0; i < size; i++){
-			arr[x][y - i].hidden_value = 'X';
+			arr[x][y - i].hidden_value = ship_symbol;
 			arr[x][y - i].ship_type = size;
 			validate_surrounding_cells(arr, x, (y - i));
 		}
@@ -452,7 +456,7 @@ int print_menu(char *options[], int num_of_options, int curr_option){
 	for (int i = 1; i < num_of_options + 1; i++){
 		printf("\033[%dm––>\033[0m%s\n", option[i], options[i]);
 	}
-	system("../../../bin/stty raw");
+	system("/bin/stty raw");
 	do{
 		do{
 		    printf("\033[8m");
@@ -466,7 +470,7 @@ int print_menu(char *options[], int num_of_options, int curr_option){
 		a = getchar();
 	}
 	while (a != 'A' && a != 'B');
-	system("../../../bin/stty cooked");
+	system("/bin/stty cooked");
 	if (a == 13){
 		printf("\n");
 		return curr_option;
@@ -517,7 +521,7 @@ void remove_from_board(struct node_t** arr, int x, char z, char direction, int s
 
 	if(direction == 'U'){
 		for(int i = 0; i < size; i++){
-			arr[x - i][y].hidden_value = 'O';
+			arr[x - i][y].hidden_value = water_symbol;
 			arr[x - i][y].ship_type = 0;
 			reverse_validate_surrounding_cells(arr, (x - i), y);
 		}
@@ -525,7 +529,7 @@ void remove_from_board(struct node_t** arr, int x, char z, char direction, int s
 
 	if(direction == 'D'){
 		for(int i = 0; i < size; i++){
-			arr[x + i][y].hidden_value = 'O';
+			arr[x + i][y].hidden_value = water_symbol;
 			arr[x + i][y].ship_type = 0;
 			reverse_validate_surrounding_cells(arr, (x + i), y);
 		}
@@ -533,7 +537,7 @@ void remove_from_board(struct node_t** arr, int x, char z, char direction, int s
 
 	if(direction == 'R'){
 		for(int i = 0; i < size; i++){
-			arr[x][y + i].hidden_value = 'O';
+			arr[x][y + i].hidden_value = water_symbol;
 			arr[x][y + i].ship_type = 0;
 			reverse_validate_surrounding_cells(arr, x, (y + i));
 		}
@@ -541,7 +545,7 @@ void remove_from_board(struct node_t** arr, int x, char z, char direction, int s
 
 	if(direction == 'L'){
 		for(int i = 0; i < size; i++){
-			arr[x][y - i].hidden_value = 'O';
+			arr[x][y - i].hidden_value = water_symbol;
 			arr[x][y - i].ship_type = 0;
 			reverse_validate_surrounding_cells(arr, x, (y - i));
 		}
@@ -567,7 +571,7 @@ void remove_ship(struct node_t** arr, int* ships_left){
 
 void enter_map(struct node_t** arr){
 	int answer;
-	char *options[4] = {"Do you want to use a file to create your map?", "Yes", "No"};
+	char *options[4] = {"Do you want to use a file to create your map?", "\033[92;1mYes\033[0m", "\033[91;1mNo\033[0m"};
 	int ships_left [] = {4, 3, 2, 0, 1};
 	answer = print_menu(options, 2, 1);
 	if(answer == 1){
@@ -620,34 +624,34 @@ void enter_map(struct node_t** arr){
 		}
 		while(entering_map);
 	}
-	system("cls");
-	//system("clear");
+	//system("cls");
+	system("clear");
 }
 
 void update_surrounding_water (struct node_t **arr, int x, int y){
-	if (arr[x - 1][y - 1].value != 'X'){
-		arr[x - 1][y - 1].value = 'O';
+	if (arr[x - 1][y - 1].value != ship_symbol){
+		arr[x - 1][y - 1].value = water_symbol;
 	}
-	if (arr[x - 1][y].value != 'X'){
-		arr[x - 1][y].value = 'O';
+	if (arr[x - 1][y].value != ship_symbol){
+		arr[x - 1][y].value = water_symbol;
 	}
-	if (arr[x - 1][y + 1].value != 'X'){
-		arr[x - 1][y + 1].value = 'O';
+	if (arr[x - 1][y + 1].value != ship_symbol){
+		arr[x - 1][y + 1].value = water_symbol;
 	}
-	if (arr[x][y - 1].value != 'X'){
-		arr[x][y - 1].value = 'O';
+	if (arr[x][y - 1].value != ship_symbol){
+		arr[x][y - 1].value = water_symbol;
 	}
-	if (arr[x][y + 1].value != 'X'){
-		arr[x][y + 1].value = 'O';
+	if (arr[x][y + 1].value != ship_symbol){
+		arr[x][y + 1].value = water_symbol;
 	}
-	if (arr[x + 1][y - 1].value != 'X'){
-		arr[x + 1][y - 1].value = 'O';
+	if (arr[x + 1][y - 1].value != ship_symbol){
+		arr[x + 1][y - 1].value = water_symbol;
 	}
-	if (arr[x + 1][y].value != 'X'){
-		arr[x + 1][y].value = 'O';
+	if (arr[x + 1][y].value != ship_symbol){
+		arr[x + 1][y].value = water_symbol;
 	}
-	if (arr[x + 1][y + 1].value != 'X'){
-		arr[x + 1][y + 1].value = 'O';
+	if (arr[x + 1][y + 1].value != ship_symbol){
+		arr[x + 1][y + 1].value = water_symbol;
 	}
 }
 
@@ -656,12 +660,12 @@ void update_for_sunken_ships(struct node_t **arr){
 	int size;
 	for (int i = 1; i < 11; i++){
 		for (int j = 1; j < 11; j++){
-			if (arr[i][j].value == 'X' && arr[i][j].ship_type && arr[i][j].valid == 1){
+			if (arr[i][j].value == ship_symbol && arr[i][j].ship_type && arr[i][j].valid == 1){
 				flag = true;
 				size = arr[i][j].ship_type;
-				if (arr[i + 1][j].value == 'X'){
+				if (arr[i + 1][j].value == ship_symbol){
 					for (int k = 0; k < size; k++){
-						if (arr[i + k][j].value != 'X'){
+						if (arr[i + k][j].value != ship_symbol){
 							flag = false;
 						}
 					}
@@ -670,12 +674,12 @@ void update_for_sunken_ships(struct node_t **arr){
 							update_surrounding_water(arr, i + k, j);
 							arr[i + k][j].ship_type = 0;
 						}
-						printf("The ship is underwater!!!\n");
+						printf("\033[96;1mThe ship is underwater!!!\033[0m\n");
 					}
 				}
-				if (arr[i][j + 1].value){
+				if (arr[i][j + 1].value == ship_symbol){
 					for (int k = 0; k < size; k++){
-						if (arr[i][j + k].value != 'X'){
+						if (arr[i][j + k].value != ship_symbol){
 							flag = false;
 						}
 					}
@@ -684,7 +688,7 @@ void update_for_sunken_ships(struct node_t **arr){
 							update_surrounding_water(arr, i, j + k);
 							arr[i][j + k].ship_type = 0;
 						}
-						printf("The ship is underwater!!!\n");
+						printf("\033[96;1mThe ship is underwater!!!\033[0m\n");
 					}
 				}
 			}
@@ -803,7 +807,7 @@ bool make_a_guess(struct node_t **arr, int *last_p){
         if(check_xy(x, (y + 'A' - 1))){
 			return make_a_guess(arr, last_p);
         }
-        if(arr[x][y].value != '*'){
+        if(arr[x][y].value != not_guessed_symbol){
             printf("Already guessed!!!\n");
             printf("Try again!\n");
 			return make_a_guess(arr, last_p);
@@ -848,7 +852,7 @@ bool make_a_guess(struct node_t **arr, int *last_p){
 			printf("Invalid direction!!!");
 			return make_a_guess(arr, last_p);
 		}
-		if (arr[x][y].value != '*'){
+		if (arr[x][y].value != not_guessed_symbol){
             printf("Already guessed!!!\n");
             printf("Try again!\n");
             return make_a_guess(arr, last_p);
@@ -856,15 +860,23 @@ bool make_a_guess(struct node_t **arr, int *last_p){
 	}
     arr[x][y].value = arr[x][y].hidden_value;
     *last_p = 10*x + y;
-	if (arr[x][y].value == 'X'){
+	if (arr[x][y].value == ship_symbol){
 		return true;
 	}
 	return false;
 }
 
+void wait_for_enter_pressed(){
+	char a = ' ';
+	printf("\033[8m");
+	while (a != '\n'){
+		a = getchar();
+	}
+	printf("\033[0m");
+}
+
 void player_turn(struct node_t **other_map, struct node_t **our_map, int *last_p, int *num_of_x, bool computer){
 	int answer;
-	char a = ' ';
 	if (game_over){
 		return ;
 	}
@@ -888,35 +900,23 @@ void player_turn(struct node_t **other_map, struct node_t **our_map, int *last_p
 		}
 		print_board(other_map, false);
 		printf("\nPress enter to go back to the menu!\n");
-		while (a != '\n'){
-			printf("\033[8m");
-			a = getchar();
-			printf("\033[0m");
-		}
+		wait_for_enter_pressed();
 		player_turn(other_map, our_map, last_p, num_of_x, computer);
 		break;
 	case 2:
 		if (make_a_guess(other_map, last_p)){
 			(*num_of_x)++;
 			game_over = *num_of_x == 31;
-			printf("You hit a ship!\n");
+			printf("\033[91;1mYou hit a ship!\033[0m\n");
 			update_for_sunken_ships(other_map);
 			printf("\nPress enter to continue!\n");
-			while (a != '\n'){
-				printf("\033[8m");
-				a = getchar();
-				printf("\033[0m");
-			}
+			wait_for_enter_pressed();
 			player_turn(other_map, our_map, last_p, num_of_x, computer);
 		}
 		else{
 			printf("You missed!\n");
 			printf("Press enter to pass!");
-			while (a != '\n'){
-				printf("\033[8m");
-				a = getchar();
-				printf("\033[0m");
-			}
+			wait_for_enter_pressed();
 			turn++;
 		}
 		break;
@@ -926,11 +926,7 @@ void player_turn(struct node_t **other_map, struct node_t **our_map, int *last_p
 		printf("Your board:\n");
 		print_board(our_map, false);
 		printf("\nPress enter to go back to the menu!\n");
-		while (a != '\n'){
-			printf("\033[8m");
-			a = getchar();
-			printf("\033[0m");
-		}
+		wait_for_enter_pressed();
 		player_turn(other_map, our_map, last_p, num_of_x, computer);
 		break;
 	}
@@ -945,9 +941,9 @@ void computer_turn(struct node_t **arr, int *num_of_x){
 		x = rand() % 10 + 1;
 		y = rand() % 10 + 1;
 	}
-	while (arr[x][y].value != '*');
+	while (arr[x][y].value != not_guessed_symbol);
 	arr[x][y].value = arr[x][y].hidden_value;
-	if (arr[x][y].value == 'X'){
+	if (arr[x][y].value == ship_symbol){
 		(*num_of_x)++;
 		game_over = *num_of_x == 31;
 		computer_turn(arr, num_of_x);
@@ -979,39 +975,73 @@ void singleplayer(){
 		}
 		if (!game_over){
 			computer_turn(player, &comp_x);
-		}
-		if (game_over){
-			printf("\033[93;1mHAA NOOB!\033[0m");
+			if (game_over){
+				printf("\033[93;1mHAA NOOB!\033[0m");
+			}
 		}
 	}
 	destroy(player);
 	destroy(bot);
 }
 
+void wait(int i){
+	while (i){
+		i--;
+	}
+}
+
+void turn_change_text(char *str, int text_color, int player_color){
+	system("clear");
+	system("/bin/stty raw");
+	while (*str != '\0'){
+		if (*str != 'A' && *str != 'B'){
+			printf("\033[%d;1m%c\033[0m", text_color, *str);
+		}
+		else{
+			printf("\033[%d;1m%c\033[0m", player_color, *str);
+		}
+		wait(4000000);
+		str++;
+	}
+	system("/bin/stty cooked");
+	printf("\n\n\n\033[%d;1mPress \033[%d;1menter \033[%d;1mto \033[%d;1mgo \033[%d;1mto \033[%d;1mthe \033[%d;1mmenu!\n", text_color, player_color, text_color, player_color, text_color, player_color, text_color);
+	wait_for_enter_pressed();
+}
+
 void two_player_game(){
 	struct node_t** arr_A = create_board();
 	struct node_t** arr_B = create_board();
+	int correct_guesses_A = 0, correct_guesses_B = 0, last_p_A = 0, last_p_B = 0;
 	//system("cls");
 	system("clear");
 
-	printf("Player A please enter your map!\n");
+	turn_change_text("Player\n\nA\n\ntime\n\nto\n\ncreate\n\nyour\n\nmap!\n", 92, 93);
     enter_map(arr_A);
-
-    int correct_guesses_A = 0, correct_guesses_B = 0, last_p_A = 0, last_p_B = 0;
     if(!game_over){
-        printf("Player B please enter your map!\n");
+        turn_change_text("Player\nB\nplease\nenter\nyour\nmap!\n", 93, 92);
         enter_map(arr_B);
     }
 	turn = 1;
-    if(!game_over){
-        printf("Let the game begin!!!\n");
-    }
 
     while(!game_over){
-        printf("Player A\n");
+        turn_change_text("It\'s \n\n player \n\n A\'s \n\n turn!", 92, 93);
         player_turn(arr_B, arr_A, &last_p_A, &correct_guesses_A, false);
-        printf("Player B\n");
-        player_turn(arr_A, arr_B, &last_p_B, &correct_guesses_B, false);
+        if (game_over){
+        	system("clear");
+        	print_board(arr_A, false);
+        	printf("\033[92;1;4m\n\n		Player A WINS!\n\n\n\033[0m");
+        	print_board(arr_B, false);
+        }
+        if (!game_over){
+        	turn_change_text("It\'s \n\n player \n\n B\'s \n\n turn!", 93, 92);
+        	player_turn(arr_A, arr_B, &last_p_B, &correct_guesses_B, false);
+        	if (game_over){
+        		system("clear");
+        		print_board(arr_B, false);
+        		printf("\033[93;1;4m\n\n		Player B WINS!\n\n\n\033[0m");
+        		print_board(arr_A, false);
+        	}
+        }
     }
 
 	destroy (arr_A);

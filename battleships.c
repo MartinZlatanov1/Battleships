@@ -754,7 +754,6 @@ void auto_generate_map(struct node_t **arr){
 	char directions[4] = {'U', 'D', 'R', 'L'};
 	int x, y, i = 4;
 	char direction;
-	srand(time(0));
 	do{
 		if (!ships_left[i]){
 			i--;
@@ -790,7 +789,7 @@ bool make_a_guess(struct node_t **arr, int *last_p){
 		do{
 			input[0] = getchar();
 		}
-		while (input[0] < '1' && input[0] > '9');
+		while (input[0] < '1' || input[0] > '9');
     }
 	do{
 		input[1] = getchar();
@@ -945,19 +944,79 @@ void player_turn(struct node_t **other_map, struct node_t **our_map, int *last_p
 }
 
 void computer_turn(struct node_t **arr, int *last_p, int *num_of_x){
-	int x, y;
+	int x, y, i;
+	bool flag;
 	if (game_over){
 		return ;
 	}
-	do {
-		x = rand() % 10 + 1;
-		y = rand() % 10 + 1;
+	if (!*last_p){
+		do {
+			x = rand() % 10 + 1;
+			y = rand() % 10 + 1;
+		}
+		while (arr[x][y].value != not_guessed_symbol);
 	}
-	while (arr[x][y].value != not_guessed_symbol);
+	else{
+		x = *last_p / 10;
+		y = *last_p % 10;
+		if (!y){
+			x--;
+			y = 10;
+		}
+		if (x != 1 && arr[x - 1][y].value != water_symbol){
+			i = 0;
+			flag = false;
+			while (arr[x - i][y].value == ship_symbol){
+				i++;
+			}
+			if (arr[x - i][y].value == water_symbol || x == i){
+				flag = true;
+			}
+			else{
+				x = x - i;
+			}
+		}
+		if (x != 10 && arr[x + 1][y].value != water_symbol && flag){
+			i = 0;
+			flag = false;
+			while (arr[x + i][y].value == ship_symbol){
+				i++;
+			}
+			if (arr[x + i][y].value == water_symbol || x == 11 - i){
+				flag = true;
+			}
+			else{
+				x = x + i;
+			}
+		}
+		if (y != 1 && arr[x][y - 1].value != water_symbol && flag){
+			i = 0;
+			flag = false;
+			while (arr[x][y - i].value == ship_symbol){
+				i++;
+			}
+			if (arr[x][y - i].value == water_symbol || y == i){
+				flag = true;
+			}
+			else{
+				y = y - i;
+			}
+		}
+		if (y != 10 && arr[x][y + 1].value != water_symbol && flag){
+			i = 0;
+			while (arr[x][y + i].value == ship_symbol || y == 11 - i){
+				i++;
+			}
+			y = y + i;
+		}
+	}
 	arr[x][y].value = arr[x][y].hidden_value;
 	if (arr[x][y].value == ship_symbol){
 		(*num_of_x)++;
 		game_over = *num_of_x == 31;
+		if (!*last_p){
+			*last_p = 10*x + y;
+		}
 		if (update_for_sunken_ships(arr)){
 			*last_p = 0;
 		}
@@ -991,11 +1050,11 @@ void turn_change_text(char *str, int text_color, int player_color){
 		else{
 			printf("\033[%d;1m%c\033[0m", player_color, *str);
 		}
-		wait(4000000);
+		wait(2000000);
 		str++;
 	}
 	system("/bin/stty cooked");
-	printf("\n\n\n\033[%d;1mPress \033[%d;1menter \033[%d;1mto \033[%d;1mgo \033[%d;1mto \033[%d;1mthe \033[%d;1mmenu!\n", text_color, player_color, text_color, player_color, text_color, player_color, text_color);
+	printf("\n\n\033[%d;1mPress \033[%d;1menter \033[%d;1mto \033[%d;1mgo \033[%d;1mto \033[%d;1mthe \033[%d;1mmenu!\n", text_color, player_color, text_color, player_color, text_color, player_color, text_color);
 	wait_for_enter_pressed();
 }
 
@@ -1010,13 +1069,21 @@ void singleplayer(){
 	while (!game_over){
 		player_turn(bot, player, &last_p, &player_x, true);
 		if (game_over){
-			printf("\033[92;1mYou won!!!\033[0m");
+			printf("\033[95;1mYour board:\n\033[0m");
+			print_board(player, false);
+			printf("\033[95;1;4m		You won!!!\033[0m");
+			printf("\n\033[94;1mComputer's board:\n\033[0m");
+			print_board(bot, false);
 			break;
 		}
 		if (!game_over){
 			computer_turn(player, &comp_p, &comp_x);
 			if (game_over){
-				printf("\033[93;1mHAA NOOB!\033[0m");
+				printf("\033[94;1mComputer's board:\n\033[0m");
+				print_board(bot, false);
+				printf("\033[94;1;4m		HAA NOOB!\033[0m");
+				printf("\n\033[95;1mYour board:\n\033[0m");
+				print_board(player, false);
 			}
 		}
 	}
@@ -1034,7 +1101,7 @@ void two_player_game(){
 	turn_change_text("Player \n\n A \n\n time \n\n to \n\n create \n\n your \n\n map!\n\n", 92, 93);
     enter_map(arr_A);
     if(!game_over){
-        turn_change_text("Player \n\n Btime \n\n to \n\n create \n\n your \n\n map!\n\n", 93, 92);
+        turn_change_text("Player \n\n B \n\n time \n\n to \n\n create \n\n your \n\n map!\n\n", 93, 92);
         enter_map(arr_B);
     }
 	turn = 1;
@@ -1044,8 +1111,10 @@ void two_player_game(){
         player_turn(arr_B, arr_A, &last_p_A, &correct_guesses_A, false);
         if (game_over){
         	system("clear");
+        	printf("\033[92;1mPlayer A\'s board:\n\033[0m");
         	print_board(arr_A, false);
         	printf("\033[92;1;4m\n\n		Player A WINS!\n\n\n\033[0m");
+        	printf("\n\033[93;1mPlayer B\'s board:\n\033[0m");
         	print_board(arr_B, false);
         }
         if (!game_over){
@@ -1053,8 +1122,10 @@ void two_player_game(){
         	player_turn(arr_A, arr_B, &last_p_B, &correct_guesses_B, false);
         	if (game_over){
         		system("clear");
+        		printf("\033[93;1mPlayer B\'s board:\n\033[0m");
         		print_board(arr_B, false);
         		printf("\033[93;1;4m\n\n		Player B WINS!\n\n\n\033[0m");
+        		printf("\n\033[92;1mPlayer A\'s board:\n\033[0m");
         		print_board(arr_A, false);
         	}
         }
@@ -1065,6 +1136,7 @@ void two_player_game(){
 }
 
 int main(){
+	srand(time(0));
 	int answer;
 	char *options[] = {"Choose game mode:", "Singleplayer", "Two player game"};
 	answer = print_menu(options, 2, 1);

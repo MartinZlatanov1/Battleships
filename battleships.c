@@ -103,7 +103,9 @@ bool extract_file(struct node_t **arr){
 	char filename[31];
 	printf("Enter the name of the name of the file.\n\
 The first 10 lines should be 10 characters of O's and X's and an enter. The rest doesn't matter.\n");
+	printf("\033[94;1m");
 	fgets (filename, 31, stdin);
+	printf("\033[0m");
 	if (filename[strlen(filename) - 1] == '\n'){
 		filename[strlen(filename) - 1] = '\0';
 	}
@@ -485,10 +487,10 @@ int print_menu(char *options[], int num_of_options, int curr_option){
 }
 
 void ask_for_ship(struct node_t** arr, int* ships_left){
-	printf("Ships you have left to put in place(number ships x size):");
+	printf("Ships you have left to put in place:\n\033[95;1mships \033[0;1mx \033[93;1msize\033[0m\n");
 	for(int i = 0, k = 2; i < 5; i++, k++){
 		if(i != 3){
-			printf("%dx%d ", ships_left[i], k);
+			printf("\033[95;1m%d\033[0;1m x \033[93;1m%d\033[0m\n", ships_left[i], k);
 		}
 	}
 
@@ -569,12 +571,93 @@ void remove_ship(struct node_t** arr, int* ships_left){
 	ships_left[size - 2]++;
 }
 
+bool valid_position(struct node_t **arr, int x, int y, char direction, int size){
+	if(direction == 'L' && y < size){
+		return true;
+	}
+
+	if(direction == 'R' && 10 - y < size){
+		return true;
+	}
+
+	if(direction == 'U' && x < size){
+		return true;
+	}
+
+	if(direction == 'D' && (10 - x + 1) < size){
+		return true;
+	}
+	if(direction == 'U'){
+		for(int i = 0; i < size; i++){
+			if(arr[x - i][y].valid){
+				return true;
+			}
+		}
+	}
+
+	if(direction == 'D'){
+		for(int i = 0; i < size; i++){
+			if(arr[x + i][y].valid){
+				return true;
+			}
+		}
+	}
+
+	if(direction == 'R'){
+		for(int i = 0; i < size; i++){
+			if(arr[x][y + i].valid){
+				return true;
+			}
+		}
+	}
+
+	if(direction == 'L'){
+		for(int i = 0; i < size; i++){
+			if(arr[x][y - i].valid){
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+void auto_generate_map(struct node_t **arr){
+	int ships_left[] = {4, 3, 2, 0, 1};
+	char directions[4] = {'U', 'D', 'R', 'L'};
+	int x, y, i = 4;
+	char direction;
+	do{
+		if (!ships_left[i]){
+			i--;
+			continue;
+		}
+		do{
+			x = rand() % 10 + 1;
+			y = rand() % 10 + 1;
+			direction = directions[rand() % 4];
+		}
+		while (valid_position(arr, x, y, direction, i + 2));
+		paste_ship_in_map(arr, x, (y + 'A' - 1), direction, i + 2);
+		ships_left[i]--;
+	}
+	while(yes_ships_left(ships_left));
+}
+
+void wait_for_enter_pressed(){
+	char a = ' ';
+	printf("\033[8m");
+	while (a != '\n'){
+		a = getchar();
+	}
+	printf("\033[0m");
+}
+
 void enter_map(struct node_t** arr){
 	int answer;
-	char *options[4] = {"Do you want to use a file to create your map?", "\033[92;1mYes\033[0m", "\033[91;1mNo\033[0m"};
+	char *options[4] = {"\033[97;1mHow do you want to create your map?\033[0m", "Organize \033[91;1myour\033[0m map", "Using a \033[94;1mfile\033[0m", "Generate \033[95;1mrandom\033[0m map"};
 	int ships_left [] = {4, 3, 2, 0, 1};
-	answer = print_menu(options, 2, 1);
-	if(answer == 1){
+	answer = print_menu(options, 3, 1);
+	if(answer == 2){
 		if (extract_file (arr)){
 			return ;
 		 }
@@ -583,17 +666,21 @@ void enter_map(struct node_t** arr){
 		}
 
 	}
-	if (answer == 2){
+	if (answer == 3){
+		auto_generate_map(arr);
+	}
+	if (answer == 1){
 		bool entering_map = true;
+		options[0] = "\033[97;1mChoose an option:\033[0m\n";
 		do{
 			if(yes_ships_left(ships_left)){
-				options[1] = "Add a ship";
+				options[1] = "\033[92;1mAdd\033[0m a ship";
 			}
 			else{
-				options[1] = "Pass";
+				options[1] = "\033[93;1mPass\033[0m";
 			}
-			options[2] = "Change position of a ship";
-			options[3] = "Show board";
+			options[2] = "\033[91;1mChange\033[0m position of a ship";
+			options[3] = "\033[96;1mShow\033[0m board";
 			answer = print_menu(options, 3, 1);
 			switch(answer){
 			case 1:
@@ -608,18 +695,13 @@ void enter_map(struct node_t** arr){
 
 			case 2:
 				remove_ship(arr, ships_left);
-
 				ask_for_ship(arr, ships_left);
-
 				break;
 
 			case 3:
 				print_board(arr, true);
+				wait_for_enter_pressed();
 				break;
-
-			default:
-				printf("Incorrect option!!!\n");
-
 			}
 		}
 		while(entering_map);
@@ -699,77 +781,6 @@ bool update_for_sunken_ships(struct node_t **arr){
 	return ship_destroyed;
 }
 
-bool valid_position(struct node_t **arr, int x, int y, char direction, int size){
-	if(direction == 'L' && y < size){
-		return true;
-	}
-
-	if(direction == 'R' && 10 - y < size){
-		return true;
-	}
-
-	if(direction == 'U' && x < size){
-		return true;
-	}
-
-	if(direction == 'D' && (10 - x + 1) < size){
-		return true;
-	}
-	if(direction == 'U'){
-		for(int i = 0; i < size; i++){
-			if(arr[x - i][y].valid){
-				return true;
-			}
-		}
-	}
-
-	if(direction == 'D'){
-		for(int i = 0; i < size; i++){
-			if(arr[x + i][y].valid){
-				return true;
-			}
-		}
-	}
-
-	if(direction == 'R'){
-		for(int i = 0; i < size; i++){
-			if(arr[x][y + i].valid){
-				return true;
-			}
-		}
-	}
-
-	if(direction == 'L'){
-		for(int i = 0; i < size; i++){
-			if(arr[x][y - i].valid){
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
-void auto_generate_map(struct node_t **arr){
-	int ships_left[] = {4, 3, 2, 0, 1};
-	char directions[4] = {'U', 'D', 'R', 'L'};
-	int x, y, i = 4;
-	char direction;
-	do{
-		if (!ships_left[i]){
-			i--;
-			continue;
-		}
-		do{
-			x = rand() % 10 + 1;
-			y = rand() % 10 + 1;
-			direction = directions[rand() % 4];
-		}
-		while (valid_position(arr, x, y, direction, i + 2));
-		paste_ship_in_map(arr, x, (y + 'A' - 1), direction, i + 2);
-		ships_left[i]--;
-	}
-	while(yes_ships_left(ships_left));
-}
 
 bool make_a_guess(struct node_t **arr, int *last_p){
 	char input[4] = "";
@@ -875,13 +886,17 @@ bool make_a_guess(struct node_t **arr, int *last_p){
 	return false;
 }
 
-void wait_for_enter_pressed(){
-	char a = ' ';
-	printf("\033[8m");
-	while (a != '\n'){
-		a = getchar();
+
+bool is_game_over(struct node_t** arr){
+	for (int i = 1; i < 11; i++){
+		for (int j = 1; j < 11; j++){
+			if (arr[i][j].ship_type){
+				return false;
+			}
+		}
 	}
-	printf("\033[0m");
+	
+	return true;
 }
 
 void player_turn(struct node_t **other_map, struct node_t **our_map, int *last_p, int *num_of_x, bool computer){
@@ -890,11 +905,11 @@ void player_turn(struct node_t **other_map, struct node_t **our_map, int *last_p
 		return ;
 	}
 	if (computer){
-		char *options[] = {"Choose an option:", "Check your progress", "Make a guess", "Check the computer\'s progress"};
+		char *options[] = {"\033[0;1mChoose an option:\033[0m", "Check \033[95;1myour\033[0m progress", "Make a \033[92;1mguess\033[0m", "Check the \033[94;1mcomputer\'s\033[0m progress"};
 		answer = print_menu(options, 3, 1);
 	}
 	else{
-		 char *options[] = {"Choose an option:", "Show other player\'s board", "Make your guess"};
+		 char *options[] = {"\033[0;1mChoose an option:\033[0m", "Show other \033[92;1mplayer\'s\033[0m board", "Make \033[91;1myour\033[0m guess"};
 		 answer = print_menu(options, 2, 1);
 	}
 	switch (answer){
@@ -905,7 +920,7 @@ void player_turn(struct node_t **other_map, struct node_t **our_map, int *last_p
 			printf("\033[94;1mComputer\'s board:\033[0m\n");
 		}
 		else{
-			printf("Other player\'s board:\n");
+			printf("\033[93;1mOther\033[0m player\'s board:\n");
 		}
 		print_board(other_map, false);
 		printf("\nPress enter to go back to the menu!\n");
@@ -914,12 +929,12 @@ void player_turn(struct node_t **other_map, struct node_t **our_map, int *last_p
 		break;
 	case 2:
 		if (make_a_guess(other_map, last_p)){
-			(*num_of_x)++;
-			game_over = *num_of_x == 31;
+			
 			printf("\033[91;1mYou hit a ship!\033[0m\n");
 			if (update_for_sunken_ships(other_map)){
 				*last_p = 0;
 			}
+			game_over = is_game_over(other_map);
 			printf("\nPress enter to continue!\n");
 			wait_for_enter_pressed();
 			player_turn(other_map, our_map, last_p, num_of_x, computer);
@@ -946,6 +961,7 @@ void player_turn(struct node_t **other_map, struct node_t **our_map, int *last_p
 void computer_turn(struct node_t **arr, int *last_p, int *num_of_x){
 	int x, y, i;
 	bool flag;
+	system("clear");
 	if (game_over){
 		return ;
 	}
@@ -1012,15 +1028,16 @@ void computer_turn(struct node_t **arr, int *last_p, int *num_of_x){
 	}
 	arr[x][y].value = arr[x][y].hidden_value;
 	if (arr[x][y].value == ship_symbol){
-		(*num_of_x)++;
-		game_over = *num_of_x == 31;
+		
 		if (!*last_p){
 			*last_p = 10*x + y;
 		}
 		if (update_for_sunken_ships(arr)){
 			*last_p = 0;
 		}
+		game_over = is_game_over(arr);
 		computer_turn(arr, last_p, num_of_x);
+		
 	}
 	else{
 		turn++;
@@ -1071,7 +1088,7 @@ void singleplayer(){
 		if (game_over){
 			printf("\033[95;1mYour board:\n\033[0m");
 			print_board(player, false);
-			printf("\033[95;1;4m		You won!!!\033[0m");
+			printf("\n\033[95;1;4m		You won!!!\033[0m\n");
 			printf("\n\033[94;1mComputer's board:\n\033[0m");
 			print_board(bot, false);
 			break;
@@ -1081,7 +1098,7 @@ void singleplayer(){
 			if (game_over){
 				printf("\033[94;1mComputer's board:\n\033[0m");
 				print_board(bot, false);
-				printf("\033[94;1;4m		HAA NOOB!\033[0m");
+				printf("\n\033[94;1;4m		HAA NOOB!\033[0m\n");
 				printf("\n\033[95;1mYour board:\n\033[0m");
 				print_board(player, false);
 			}
@@ -1138,7 +1155,7 @@ void two_player_game(){
 int main(){
 	srand(time(0));
 	int answer;
-	char *options[] = {"Choose game mode:", "Singleplayer", "Two player game"};
+	char *options[] = {"Choose game mode:", "\033[95;1mSingle\033[94;1mplayer\033[0m", "\033[93;1mTwo \033[92;1mplayer \033[93;1mgame\033[0m"};
 	answer = print_menu(options, 2, 1);
 	if (answer == 1){
 		singleplayer();
@@ -1148,4 +1165,3 @@ int main(){
 	}
 	return 0;
 }
-

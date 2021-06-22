@@ -294,20 +294,6 @@ bool check_if_occupied(struct node_t **arr, int x, char z, char direction, int s
 
 bool check_if_real(struct node_t** arr, int x, char z, char direction, int size, int* ships_left){
 	int y = z - 'A' + 1;
-	bool flag = true;
-
-	for(int i = 0; i < 5; i++){
-		if(ships_left[i] == (i + 2) || i == 3){
-			continue;
-		}
-
-		flag = false;
-	}
-
-	if(flag){
-		printf("Empty map!!!\n");
-		return true;
-	}
 
 	if(x < 1 || x > 10){
 		printf("Invalid x!!!\n");
@@ -481,11 +467,12 @@ int print_menu(char *options[], int num_of_options, int curr_option){
 }
 
 void ask_for_ship(struct node_t** arr, int* ships_left){
-	printf("Ships you have left to put in place:\n\033[95;1mships \033[0;1mx \033[93;1msize\033[0m\n");
-	for(int i = 0, k = 2; i < 5; i++, k++){
-		if(i != 3){
-			printf("\033[95;1m%d\033[0;1m x \033[93;1m%d\033[0m\n", ships_left[i], k);
+	printf("Ships you have to put in place:\n\033[95;1mships \033[0;1mx \033[93;1msize\033[0m\n");
+	for(int i = 0; i < 5; i++){
+		if(i == 3){
+			continue;
 		}
+		printf("\033[95;1m%d\033[0;1m x \033[93;1m%d\033[0m\n", ships_left[i], i + 2);
 	}
 	int x, size;
 	char y, direction;
@@ -664,7 +651,10 @@ void enter_map(struct node_t** arr){
 	}
 	if (answer == 1){
 		bool entering_map = true;
-		options[0] = "\033[97;1mChoose an option:\033[0m\n";
+		system("clear");
+		printf("\033[93;1mTime \033[94;1mto \033[92;1madd \033[95;1myour \033[91;1mfirst \033[96;1mship!\033[0m\n");
+		ask_for_ship(arr, ships_left);
+		options[0] = "\033[97;1mChoose an option:\033[0m";
 		do{
 			if(yes_ships_left(ships_left)){
 				options[1] = "\033[92;1mAdd\033[0m a ship";

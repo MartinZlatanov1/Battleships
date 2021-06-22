@@ -151,11 +151,10 @@ void find_ship_type_vertically(struct node_t **arr, int x, int y){
 }
 
 bool check_ships (struct node_t **arr, int *ships_left){
-	int num_of_x = 0;
+	bool flag = false;
 	for (int i = 1; i < 11; i++){
 		for (int j = 1; j < 11; j++){
 			if (arr[i][j].hidden_value == ship_symbol){
-				num_of_x++;
 				if (arr[i][j].valid == 0 || arr[i][j].valid > 2){
 					printf("The map is not valid!\n");
 					game_over = true;
@@ -169,6 +168,7 @@ bool check_ships (struct node_t **arr, int *ships_left){
 						continue;
 					}
 					game_over = true;
+					printf("Ships cannot touch each other!!!");
 					return true;
 				}
 				if (!arr[i][j].ship_type && arr[i][j].valid == 1){
@@ -183,16 +183,22 @@ bool check_ships (struct node_t **arr, int *ships_left){
 			}
 		}
 	}
-	if (num_of_x != 31){
-		printf("Not enough or too many ships!\n");
-		game_over = true;
-		return true;
-	}
 	for (int i = 0; i < 5; i++){
 		if (!ships_left[i]){
 			continue;
 		}
-		printf("Too many or too few ships of size %d\n", i + 2);
+		if (ships_left[i] < 0){
+			printf("Too many ships of size %d\n", i + 2);
+			flag = true;
+		}
+		else{
+			printf("Too few ships of size %d\n", i + 2);
+			flag = true;
+		}
+	}
+	if (flag){
+		game_over = true;
+		return true;
 	}
 	return false;
 }
@@ -1075,6 +1081,7 @@ void singleplayer(){
 	while (!game_over){
 		player_turn(bot, player, &last_p, true);
 		if (game_over){
+			system("clear");
 			printf("\033[95;1mYour board:\n\033[0m");
 			print_board(player, false);
 			printf("\n\033[95;1;4m		You won!!!\033[0m\n");
@@ -1085,9 +1092,10 @@ void singleplayer(){
 		if (!game_over){
 			computer_turn(player, &comp_p);
 			if (game_over){
+				system("clear");
 				printf("\033[94;1mComputer's board:\n\033[0m");
 				print_board(bot, false);
-				printf("\n\033[94;1;4m		HAA NOOB!\033[0m\n");
+				printf("\n\033[94;1;4m		You lost!\033[0m\n");
 				printf("\n\033[95;1mYour board:\n\033[0m");
 				print_board(player, false);
 			}
@@ -1141,10 +1149,23 @@ void two_player_game(){
 	destroy (arr_B);
 }
 
+void colorful_print(char *str){
+	while (*str != '\0'){
+		printf("\033[%d;1m%c", 91 + rand() % 6, *str);
+		str++;
+	}
+	printf("\033[0m");
+}
+
 int main(){
 	srand(time(0));
 	int answer;
 	char *options[] = {"Choose game mode:", "\033[95;1mSingle\033[94;1mplayer\033[0m", "\033[93;1mTwo \033[92;1mplayer \033[93;1mgame\033[0m"};
+	system("clear");
+	printf("\n\n		");
+	colorful_print("Battleships");
+	printf("\n\n\n\n\nPress Enter to start the game!");
+    wait_for_enter_pressed();
 	answer = print_menu(options, 2, 1);
 	if (answer == 1){
 		singleplayer();

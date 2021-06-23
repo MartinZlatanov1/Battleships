@@ -438,7 +438,7 @@ int print_menu(char *options[], int num_of_options, int curr_option){
 	}
 	option[curr_option] = 5;
 	if (turn){
-		printf("\033[%d;1mTurn: %d\n", 91 + turn % 6, turn);
+		printf("\033[%d;1mTurn: %d\n\n", 91 + turn % 6, turn);
 	}
 	printf("%s\n", options[0]);
 	for (int i = 1; i < num_of_options + 1; i++){
@@ -779,6 +779,22 @@ bool update_for_sunken_ships(struct node_t **arr, bool computer){
 	return ship_destroyed;
 }
 
+bool surrounded_by_water (struct node_t **arr, int x, int y){
+	if (x != 1 && arr[x - 1][y].value != water_symbol){
+		return false;
+	}
+	if (x != 10 && arr[x + 1][y].value != water_symbol){
+		return false;
+	}
+	if (y != 1 && arr[x][y - 1].value != water_symbol){
+		return false;
+	}
+	if (y != 10 && arr[x][y + 1].value != water_symbol){
+		return false;
+	}
+	return true;
+}
+
 bool make_a_guess(struct node_t **arr, int *last_p){
 	char input[4] = "";
 	int x = 0, y;
@@ -877,6 +893,9 @@ bool make_a_guess(struct node_t **arr, int *last_p){
 	}
     arr[x][y].value = arr[x][y].hidden_value;
     *last_p = 10*x + y;
+    if (surrounded_by_water(arr, x, y)){
+    	*last_p = 0;
+    }
 	if (arr[x][y].value == ship_symbol){
 		return true;
 	}
@@ -964,7 +983,7 @@ void computer_turn(struct node_t **arr, int *last_p){
 			x = rand() % 10 + 1;
 			y = rand() % 10 + 1;
 		}
-		while (arr[x][y].value != not_guessed_symbol);
+		while (arr[x][y].value != not_guessed_symbol && surrounded_by_water(arr, x, y));
 	}
 	else{
 		x = *last_p / 10;
@@ -1034,7 +1053,7 @@ void computer_turn(struct node_t **arr, int *last_p){
 	}
 	else{
 		turn++;
-		printf("Press Enter ro start your turn!\n");
+		printf("Press Enter to start your turn!\n");
 		wait_for_enter_pressed();
 	}
 }
@@ -1165,7 +1184,11 @@ int main(){
 	printf("\n\n		");
 	colorful_print("Battleships");
 	printf("\n\n\n\n\nPress Enter to start the game!");
-    wait_for_enter_pressed();
+	wait_for_enter_pressed();
+   	system("clear");
+   	printf("\n		\033[37mDESCRIPTION\n\nBattleships is agame for 1 to 2 players. You are trying to guess the location of your opponent\'s ships. Ships a player has:\n\033[95;1mships\033[0;1m x \033[93;1msize\033[0m\n\033[95;1m4\033[0;1m x \033[93;1m2\033[0m\n\033[95;1m3\033[0;1m x \033[93;1m3\033[0m\n\033[95;1m2\033[0;1m x \033[93;1m4\033[0m\n\033[95;1m1\033[0;1m x \033[93;1m6\033[0m\n\033[37mIf you\'re about to use a file, be aware that the first 10 lines of a file should only contain 10 X or O symbols and an enter at the end. The rest of the file doesn't matter!\n\n");
+	printf("\n\n\n\n\nPress Enter to start the game!");
+	wait_for_enter_pressed();
 	answer = print_menu(options, 2, 1);
 	if (answer == 1){
 		singleplayer();

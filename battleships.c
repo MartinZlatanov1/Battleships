@@ -775,7 +775,7 @@ bool update_for_sunken_ships(struct node_t **arr, bool computer){
 					}
 				}
 			}
-        	}
+        }
 	}
 	return ship_destroyed;
 }
@@ -847,17 +847,20 @@ bool make_a_guess(struct node_t **arr, int *last_p){
 		printf("Invalid input\n");
 		return make_a_guess(arr, last_p);
 	}
-
-	if(input[1] != '\n'){
+    if(input[1] != '\n'){
+	        
 		if (input[1]=='0'){
-			x = (input[0] - '0') * 10 + (input[1] - '0');
-	        	y = input[2] - 'A' + 1;
+			x = 10;
+	        y = input[2] - 'A' + 1;
 		}
+        
 		else{
 			x = input[0] - '0';
 			y = input[1] - 'A' + 1;
 		}
+
     	}
+
 	else {
 		x = *last_p / 10;
 		y = *last_p % 10;
@@ -866,6 +869,7 @@ bool make_a_guess(struct node_t **arr, int *last_p){
 			x--;
 			y = 10;
 		}
+		
 		if (input[0] == 'U'){
 			if (x == 1){
 				printf("You\'re trying to go to unknown lands!\n");
@@ -895,12 +899,14 @@ bool make_a_guess(struct node_t **arr, int *last_p){
 			y++;
 		}
 	}
+
 	if (arr[x][y].value != not_guessed_symbol){
 		printf("Already guessed!!!\n");
 		printf("Try again!\n");
 		return make_a_guess(arr, last_p);
 		
     	}
+
     	arr[x][y].value = arr[x][y].hidden_value;
     	*last_p = 10*x + y;
     
@@ -1198,7 +1204,7 @@ int main(){
 	printf("\n\n\n\n\nPress Enter to start the game!");
 	wait_for_enter_pressed();
    	system("clear");
-   	printf("\n		\033[37;3mDESCRIPTION\n\nBattleships is a game for 1 to 2 players. The point is to guess the locations of your opponent\'s ships.\n\nLegend:\n\033[31;1mX\033[0m\033[37;3m - ship symbol\n\033[36;1mO\033[0m\033[37;3m - water symbol\n* - unguessed point\n\nShips a map should contain:\n\033[95;1mships\033[0;1m x \033[93;1msize\033[0m\n\033[95;1m    4\033[0;1m x \033[93;1m2\033[0m\n\033[95;1m    3\033[0;1m x \033[93;1m3\033[0m\n\033[95;1m    2\033[0;1m x \033[93;1m4\033[0m\n\033[95;1m    1\033[0;1m x \033[93;1m6\033[0m\n\n\033[37;3mShips can be placed horizontally or vertically (not diagonally) and they cannot touch each other in any way.\n\nIf you\'re about to use a file as a map, be aware that it\'s first 10 lines should only contain 10 symbols (X or O) each andan enter at the end. The rest doesn't matter!\n\n");
+   	printf("\n		\033[37;3mDESCRIPTION\n\nBattleships is a game for 1 to 2 players. The point is to guess the locations of your opponent\'s ships.\n\nLegend:\n\033[31;1m%c\033[0m\033[37;3m - ship symbol\n\033[36;1m%c\033[0m\033[37;3m - water symbol\n%c - unguessed point\n\nShips a map should contain:\n\033[95;1mships\033[0;1m x \033[93;1msize\033[0m\n\033[95;1m    4\033[0;1m x \033[93;1m2\033[0m\n\033[95;1m    3\033[0;1m x \033[93;1m3\033[0m\n\033[95;1m    2\033[0;1m x \033[93;1m4\033[0m\n\033[95;1m    1\033[0;1m x \033[93;1m6\033[0m\n\n\033[37;3mShips can be placed horizontally or vertically (not diagonally) and they cannot touch each other in any way.\n\nIf you\'re about to use a file as a map, be aware that it\'s first 10 lines should only contain 10 symbols (X or O) each andan enter at the end. The rest doesn't matter!\n\n", ship_symbol, water_symbol, not_guessed_symbol);
 	printf("\033[0m\n\nPress Enter to start the game!");
 	wait_for_enter_pressed();
 	answer = print_menu(options, 2, 1);

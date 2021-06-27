@@ -382,7 +382,7 @@ bool check_if_real(struct node_t** arr, int x, char z, char direction, int size,
 		}
 	}
 
-	printf("The removal was successful!!!\n");
+	printf("\033[91;1mThe removal was successful!!!\033[0m\n");
 	return false;
 }
 
@@ -967,10 +967,10 @@ void player_turn(struct node_t **other_map, struct node_t **our_map, int *last_p
 		//system("cls");
 
 		if (computer){
-			printf("\033[94;1mComputer\'s board:\033[0m\n");
+			printf("\033[94;1;3mComputer\'s board:\033[0m\n");
 		}
 		else{
-			printf("\033[93;1mOther\033[0m player\'s board:\n");
+			printf("\033[93;1;3mOther\033[0;3m player\'s board:\033[0m\n");
 		}
 
 		print_board(other_map, false);
@@ -1006,7 +1006,7 @@ void player_turn(struct node_t **other_map, struct node_t **our_map, int *last_p
     case 3:
 		system("clear");
 		//system("cls");
-		printf("\033[95;1mYour board:\033[0m\n");
+		printf("\033[95;1;3mYour board:\033[0m\n");
 		print_board(our_map, false);
 		printf("\nPress enter to go back to the menu!\n");
 		wait_for_enter_pressed();
@@ -1151,10 +1151,10 @@ void singleplayer(){
 		if (the_end){
 			system("clear");
 			//system("cls");
-			printf("\033[95;1mYour board:\n\033[0m");
+			printf("\033[95;1;3mYour board:\n\033[0m");
 			print_board(player, false);
-			printf("\n\033[95;1;4m		You won!!!\033[0m\n");
-			printf("\n\033[94;1mComputer's board:\n\033[0m");
+			printf("\n\033[95;1;3;4;5m		You won!!!\033[0m\n");
+			printf("\n\033[94;1;3mComputer's board:\n\033[0m");
 			print_board(bot, false);
 			break;
 		}
@@ -1163,10 +1163,10 @@ void singleplayer(){
 			if (the_end){
 				system("clear");
 				//system("cls");
-				printf("\033[94;1mComputer's board:\n\033[0m");
+				printf("\033[94;1;3mComputer's board:\n\033[0m");
 				print_board(bot, false);
-				printf("\n\033[94;1;4m		You lost!\033[0m\n");
-				printf("\n\033[95;1mYour board:\n\033[0m");
+				printf("\n\033[94;1;3;4;5m		You lost!\033[0m\n");
+				printf("\n\033[95;1;3mYour board:\n\033[0m");
 				print_board(player, false);
 			}
 		}
@@ -1208,11 +1208,11 @@ void two_player_game(){
             //system("cls");
         	system("clear");
 
-        	printf("\033[92;1mPlayer A\'s board:\n\033[0m");
+        	printf("\033[92;1;3mPlayer A\'s board:\n\033[0m");
         	print_board(arr_A, false);
-        	printf("\033[92;1;4m\n\n		Player A WINS!\n\n\n\033[0m");
+        	printf("\033[92;1;3;4;5m\n\n		Player A WINS!\n\n\n\033[0m");
 
-        	printf("\n\033[93;1mPlayer B\'s board:\n\033[0m");
+        	printf("\n\033[93;1;3mPlayer B\'s board:\n\033[0m");
         	print_board(arr_B, false);
         }
         else{
@@ -1226,11 +1226,11 @@ void two_player_game(){
         	    //system("cls");
         		system("clear");
 
-        		printf("\033[93;1mPlayer B\'s board:\n\033[0m");
+        		printf("\033[93;1;3mPlayer B\'s board:\n\033[0m");
         		print_board(arr_B, false);
-        		printf("\033[93;1;4m\n\n		Player B WINS!\n\n\n\033[0m");
+        		printf("\033[93;1;3;4;5m\n\n		Player B WINS!\n\n\n\033[0m");
 
-        		printf("\n\033[92;1mPlayer A\'s board:\n\033[0m");
+        		printf("\n\033[92;1;3mPlayer A\'s board:\n\033[0m");
         		print_board(arr_A, false);
         	}
         }
@@ -1243,7 +1243,7 @@ void two_player_game(){
 
 void colorful_print(char *str){
 	while (*str != '\0'){
-		printf("\033[%d;1m%c", 91 + rand() % 6, *str);
+		printf("\033[%d;1;3m%c", 91 + rand() % 6, *str);
 		str++;
 	}
 	printf("\033[0m");

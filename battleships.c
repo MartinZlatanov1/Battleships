@@ -550,7 +550,7 @@ void remove_ship(struct node_t** arr, int* ships_left){
 	ships_left[size - 2]++;
 }
 
-bool valid_position(struct node_t **arr, int x, int y, char direction, int size){
+bool invalid_position(struct node_t **arr, int x, int y, char direction, int size){
 	if(direction == 'L' && y < size){
 		return true;
 	}
@@ -615,7 +615,7 @@ void auto_generate_map(struct node_t **arr){
 			y = rand() % 10 + 1;
 			direction = directions[rand() % 4];
 		}
-		while (valid_position(arr, x, y, direction, i + 2));
+		while (invalid_position(arr, x, y, direction, i + 2));
 		paste_ship_in_map(arr, x, (y + 'A' - 1), direction, i + 2);
 		ships_left[i]--;
 	}

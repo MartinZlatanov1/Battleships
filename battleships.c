@@ -18,7 +18,6 @@ struct node_t {
 	int ship_type;
 };
 
-
 void print_board(struct node_t** arr, bool hidden){
 	printf("\033[93;1m	A ");
 	for(int i = 2; i < 11; i++){
@@ -413,7 +412,6 @@ void paste_ship_in_map(struct node_t** arr, int x, char z, char direction, int s
 			validate_surrounding_cells(arr, x, (y - i));
 		}
 	}
-
 }
 
 int print_menu(char *options[], int num_of_options, int curr_option){
@@ -482,9 +480,7 @@ void ask_for_ship(struct node_t** arr, int* ships_left){
 		getc(stdin);
 	}
 	while(check_if_occupied(arr, x, y, direction, size, ships_left));
-
 	paste_ship_in_map(arr, x, y, direction, size);
-
 	ships_left[size - 2]--;
 }
 
@@ -841,19 +837,15 @@ bool make_a_guess(struct node_t **arr, int *last_p){
 		return make_a_guess(arr, last_p);
 	}
     if(input[1] != '\n'){
-	        
 		if (input[1]=='0'){
 			x = 10;
 	        y = input[2] - 'A' + 1;
 		}
-        
 		else{
 			x = input[0] - '0';
 			y = input[1] - 'A' + 1;
 		}
-
-    	}
-
+    }
 	else {
 		x = *last_p / 10;
 		y = *last_p % 10;
@@ -862,7 +854,6 @@ bool make_a_guess(struct node_t **arr, int *last_p){
 			x--;
 			y = 10;
 		}
-		
 		if (input[0] == 'U'){
 			if (x == 1){
 				printf("You\'re trying to go to unknown lands!\n");
@@ -892,14 +883,11 @@ bool make_a_guess(struct node_t **arr, int *last_p){
 			y++;
 		}
 	}
-
 	if (arr[x][y].value != not_guessed_symbol){
 		printf("Already guessed!!!\n");
 		printf("Try again!\n");
 		return make_a_guess(arr, last_p);
-		
     	}
-
     	arr[x][y].value = arr[x][y].hidden_value;
     	*last_p = 10*x + y;
     
@@ -1149,7 +1137,6 @@ void two_player_game(){
         enter_map(arr_B);
     }
 	turn = 1;
-
 	while(!game_over){
         turn_change_text("Player \n\n A \n\n It\'s \n\n your \n\n turn!\n\n", 92, 93);
         player_turn(arr_B, arr_A, &last_p_A, false);
@@ -1209,4 +1196,3 @@ int main(){
 	}
 	return 0;
 }
-

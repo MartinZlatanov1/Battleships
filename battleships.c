@@ -96,8 +96,7 @@ void reverse_validate_surrounding_cells (struct node_t **arr, int x, int y){
 
 bool extract_file(struct node_t **arr){
 	char filename[31];
-	printf("Enter the name of the name of the file.\n\
-The first 10 lines should be 10 characters of O's and X's and an enter. The rest doesn't matter.\n");
+	printf("Enter the name of the name of the file.\n");
 	printf("\033[94;1m");
 	fgets (filename, 31, stdin);
 	printf("\033[0m");
@@ -115,7 +114,7 @@ The first 10 lines should be 10 characters of O's and X's and an enter. The rest
 		for (int j = 1; j < 11; j++){
 			arr[i][j].hidden_value = getc(file);
 			if (!(arr[i][j].hidden_value == water_symbol || arr[i][j].hidden_value == ship_symbol)){
-				printf("File contains invalid characters!!! (It should only contain O's and X's)%c%d%d\n", arr[i][j].hidden_value, i, j);
+				printf("File contains invalid characters!!! (It should only contain O's and X's)\n");
 				game_over = true;
 				fclose(file);
 				return true;
@@ -301,13 +300,7 @@ bool check_if_occupied(struct node_t **arr, int x, char z, char direction, int s
 bool check_if_real(struct node_t** arr, int x, char z, char direction, int size, int* ships_left){
 	int y = z - 'A' + 1;
 
-	if(x < 1 || x > 10){
-		printf("Invalid x!!!\n");
-		return true;
-	}
-
-	if(y < 1 || y > 10){
-		printf("Invalid y!!!\n");
+	if (check_xy(x, z)){
 		return true;
 	}
 
@@ -1204,7 +1197,7 @@ int main(){
 	printf("\n\n\n\n\nPress Enter to start the game!");
 	wait_for_enter_pressed();
    	system("clear");
-   	printf("\n		\033[37;3mDESCRIPTION\n\nBattleships is a game for 1 to 2 players. The point is to guess the locations of your opponent\'s ships.\n\nLegend:\n\033[31;1m%c\033[0m\033[37;3m - ship symbol\n\033[36;1m%c\033[0m\033[37;3m - water symbol\n%c - unguessed point\n\nShips a map should contain:\n\033[95;1mships\033[0;1m x \033[93;1msize\033[0m\n\033[95;1m    4\033[0;1m x \033[93;1m2\033[0m\n\033[95;1m    3\033[0;1m x \033[93;1m3\033[0m\n\033[95;1m    2\033[0;1m x \033[93;1m4\033[0m\n\033[95;1m    1\033[0;1m x \033[93;1m6\033[0m\n\n\033[37;3mShips can be placed horizontally or vertically (not diagonally) and they cannot touch each other in any way.\n\nIf you\'re about to use a file as a map, be aware that it\'s first 10 lines should only contain 10 symbols (X or O) each andan enter at the end. The rest doesn't matter!\n\n", ship_symbol, water_symbol, not_guessed_symbol);
+   	printf("\033[27t		\033[37;3mDESCRIPTION\n\nBattleships is a game for 1 to 2 players. The point is to guess the locations of your opponent\'s ships.\n\nLegend:\n\033[31;1m%c\033[0m\033[37;3m - ship symbol\n\033[36;1m%c\033[0m\033[37;3m - water symbol\n%c - unguessed point\n\nShips a map should contain:\n\033[95;1mships\033[0;1m x \033[93;1msize\033[0m\n\033[95;1m    4\033[0;1m x \033[93;1m2\033[0m\n\033[95;1m    3\033[0;1m x \033[93;1m3\033[0m\n\033[95;1m    2\033[0;1m x \033[93;1m4\033[0m\n\033[95;1m    1\033[0;1m x \033[93;1m6\033[0m\n\n\033[37;3mShips can be placed horizontally or vertically (not diagonally) and they cannot touch each other in any way.\n\nIf you\'re about to use a file as a map, be aware that it\'s first 10 lines should only contain 10 symbols (X or O) each andan enter at the end. The rest doesn't matter!\n\n", ship_symbol, water_symbol, not_guessed_symbol);
 	printf("\033[0m\n\nPress Enter to start the game!");
 	wait_for_enter_pressed();
 	answer = print_menu(options, 2, 1);
